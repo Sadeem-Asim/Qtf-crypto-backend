@@ -8,9 +8,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "nodemon server.js ",
-    "start:dev": "set NODE_ENV=development & nodemon server.js",
-    "start:prod": "SET NODE_ENV=production & nodemon server.js",
+    "start": "node server.js ",
+    "start:dev": "set NODE_ENV=development & node server.js",
+    "start:prod": "SET NODE_ENV=production & node server.js",
     "data:import": "node seeder",
     "data:destroy": "node seeder -d"
   },
