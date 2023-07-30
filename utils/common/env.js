@@ -6,7 +6,7 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const envConfig = () => {
   const env =
-    process.env.NODE_ENV.trim() !== "production"
+    (process.env.NODE_ENV || "")?.trim() !== "production"
       ? "dev.config.env"
       : "prod.config.env";
   dotenv.config({
