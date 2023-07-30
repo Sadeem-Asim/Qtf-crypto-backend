@@ -119,5 +119,5 @@ dist
 .pnp.*
 
 /public/
-/build/
+# /build/
 /data/*
