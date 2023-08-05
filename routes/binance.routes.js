@@ -17,6 +17,8 @@ import {
   getPositionRisk,
   marketClose,
   adjustMargin,
+  getLeverageStats,
+  universalConversion,
 } from "#controllers/binance.controller";
 import authMiddleware from "#middlewares/auth.middleware";
 
@@ -47,5 +49,10 @@ binanceRoutes.post("/futureMarket", authMiddleware, futureMarketBuySell);
 binanceRoutes.get("/positionRisk/:id/:coin", authMiddleware, getPositionRisk);
 binanceRoutes.post("/marketClose", authMiddleware, marketClose);
 binanceRoutes.post("/adjustMargin", authMiddleware, adjustMargin);
-
+binanceRoutes.get(
+  "/leverageHistory/:id/:coin",
+  authMiddleware,
+  getLeverageStats
+);
+binanceRoutes.post("/convert", authMiddleware, universalConversion);
 export default binanceRoutes;

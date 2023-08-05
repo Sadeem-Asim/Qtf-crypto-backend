@@ -3,7 +3,6 @@ import cors from "cors";
 import express from "express";
 import { createServer } from "http";
 import cookieParser from "cookie-parser";
-
 /*****  Modules  *****/
 import logger, { myLogger } from "#utils/logger";
 import routes from "#routes/index";

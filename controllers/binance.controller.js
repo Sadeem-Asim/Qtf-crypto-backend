@@ -1,6 +1,7 @@
 import axios from "axios";
 import binanceApi from "#services/binance";
 import { UserModel } from "#models/user.model";
+import { LeverageHistory } from "#models/leverageHistoryModel";
 import extractApiKeys from "#utils/common/extractApiKeys";
 import handleBotStatus from "#utils/common/handleBotStatus";
 import getBinanceParams from "#utils/binance/getBinanceParams";
@@ -8,7 +9,7 @@ import convertToQueryParams from "#utils/common/convertToQueryParams";
 import asyncHandlerMiddleware from "#middlewares/asyncHandler.middleware";
 import binanceCloseOrder from "#utils/binance/binanceCloseOrder";
 import Binance from "node-binance-api";
-
+import _ from "lodash";
 /**
  @desc     Binance Balances
  @route    GET /api/binance/balance
@@ -307,6 +308,32 @@ const universalTransfer = asyncHandlerMiddleware(async (req, res) => {
   }
 });
 
+const universalConversion = asyncHandlerMiddleware(async (req, res) => {
+  try {
+    const { id, fromCoin, toCoin, quantity } = req.body;
+    console.log(id, fromCoin, toCoin, quantity);
+    const user = await UserModel.findById(id);
+    const { apiKey, secret } = extractApiKeys(user?.api);
+    console.log(apiKey, secret);
+    const binance = new Binance().options({
+      APIKEY: apiKey,
+      APISECRET: secret,
+      family: 4,
+    });
+    // ${fromCoin}${toCoin}
+    const result = await binance.marketBuy("BNBBTC", quantity);
+    // console.log(result.body);
+    // binance.depth("BNBBTC", (error, depth, symbol) => {
+    //   console.info(symbol + " market depth", depth);
+    // });
+    // console.log(result);
+    res.status(200).send({ message: "Done" });
+  } catch (error) {
+    console.log(error.body);
+    throw new Error("Error Plz Try Again");
+  }
+});
+
 const futurePrices = asyncHandlerMiddleware(async (req, res) => {
   try {
     const { id } = req.params;
@@ -360,14 +387,15 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
     console.log("Type : ", type);
     let response = {};
     if (reduceOnly === true) {
-      if (type === "BUY")
+      if (type === "BUY") {
         response = await binance.futuresMarketSell(coin, quantity, {
           reduceOnly: true,
         });
-      else
+      } else {
         response = await binance.futuresMarketBuy(coin, quantity, {
           reduceOnly: true,
         });
+      }
     } else {
       if (type === "BUY") {
         response = await binance.futuresMarketBuy(coin, quantity, {
@@ -385,12 +413,30 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
       console.log(user.leverage + amount);
       user.leverage = user.leverage + amount;
       user.save();
+      console.log(response);
+      console.log(response.side);
+      console.log(response.avgPrice);
+      let buy,
+        sell = 0;
+      if (response.side === "BUY") {
+        buy = response.avgPrice;
+      } else if (response.side === "SELL") {
+        sell = response.avgPrice;
+      }
+      let leverage = await LeverageHistory.findOne({
+        user: id,
+        coin,
+        active: true,
+      });
+      if (!leverage) {
+        createLeverageStats(id, coin, response.side, buy, sell, 0);
+      }
     }
 
     res.status(200).send({ message: "Done", response });
   } catch (error) {
     console.log(error);
-    res.status(400).send({ status: "Error", message: error.message });
+    res.status(200).send({ status: "Error", message: error.message });
   }
 });
 
@@ -411,16 +457,11 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
     for (let risk of risks) {
       if (risk.symbol === coin) {
         result = risk;
-        allOrders.forEach((e) => {
-          if (risk.updateTime === e.updateTime) {
-            result.side = e.side;
-          }
-        });
+        console.log(risk);
+        result.side = allOrders[allOrders.length - 1]?.side;
         break;
       }
     }
-
-    // console.log(result);
     res.status(200).send({ message: "Done", result });
   } catch (error) {
     console.log(error);
@@ -430,9 +471,11 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
 
 const marketClose = asyncHandlerMiddleware(async (req, res) => {
   try {
-    let { id, quantity, coin, type } = req.body;
+    let { id, quantity, coin, type, entryPrice, pnl } = req.body;
+    // entryPrice = _.round(entryPrice, 8);
+    console.log("entry", entryPrice);
     const user = await UserModel.findById(id);
-
+    console.log(entryPrice);
     const { apiKey, secret } = extractApiKeys(user?.api);
     console.log(apiKey, secret);
     const binance = new Binance().options({
@@ -454,8 +497,40 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
     }
     if (response?.status === "FILLED") {
       console.log(user.leverage);
+      console.log(response);
       user.leverage = 0;
       user.save();
+
+      if (type === "BUY") {
+        const leverage = await LeverageHistory.findOne({
+          user: id,
+          coin,
+          side: type,
+          // buy: entryPrice,
+          active: true,
+        });
+        if (leverage) {
+          leverage.sell = response.avgPrice;
+          leverage.profit = pnl;
+          leverage.active = false;
+          leverage.save();
+          console.log(leverage);
+        }
+      } else if (type === "SELL") {
+        const leverage = await LeverageHistory.findOne({
+          user: id,
+          coin,
+          side: type,
+          active: true,
+        });
+        if (leverage) {
+          leverage.buy = response.avgPrice;
+          leverage.profit = pnl;
+          leverage.active = false;
+          leverage.save();
+          console.log(leverage);
+        }
+      }
     }
 
     res.status(200).send({ message: "Done", response });
@@ -485,10 +560,57 @@ const adjustMargin = asyncHandlerMiddleware(async (req, res) => {
   }
 });
 
+const getLeverageStats = asyncHandlerMiddleware(async (req, res) => {
+  try {
+    const { id, coin } = req.params;
+    let buy = [],
+      sell = [];
+    let leverages = await LeverageHistory.find({ user: id, coin });
+    if (leverages.length === 0) {
+      res.status(200).send({ message: "Done", buy, sell });
+    } else {
+      leverages.reverse();
+      leverages.forEach((leverage) => {
+        if (leverage.side === "BUY") {
+          buy.push(leverage);
+        } else if (leverage.side === "SELL") {
+          sell.push(leverage);
+        }
+      });
+      console.log(leverages);
+      res.status(200).send({ message: "Done", buy, sell });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({ status: "Error", message: error.message });
+  }
+});
+
 function truncateToDecimals(num, dec = 3) {
-  const calcDec = Math.pow(10, dec);
-  return Math.trunc(num * calcDec) / calcDec;
+  let calcDec = Math.pow(10, dec);
+  calcDec = Math.trunc(num * calcDec) / calcDec;
+  return calcDec;
 }
+
+async function createLeverageStats(
+  id,
+  coin,
+  side,
+  buy = 0,
+  sell = 0,
+  profit = 0
+) {
+  const newStat = await LeverageHistory.create({
+    user: id,
+    coin,
+    side,
+    buy,
+    sell,
+    profit,
+  });
+  console.log(newStat);
+}
+
 export {
   newOrder,
   exchangeInfo,
@@ -507,4 +629,6 @@ export {
   getPositionRisk,
   marketClose,
   adjustMargin,
+  getLeverageStats,
+  universalConversion,
 };

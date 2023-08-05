@@ -26,8 +26,14 @@ const createBot = asyncHandlerMiddleware(async (req, res) => {
   const isUserExist = await UserModel.findById(req.body.user);
   if (!isUserExist) return res.status(404).send("User not found");
 
-  const { user, indicator, risk, investment, price, coin } = req.body;
-
+  const { user, indicator, risk, investment, price, coin, role } = req.body;
+  console.log(role);
+  if (role === "User") {
+    let isExistingBot = await Bot.findOne({ user: user, role, isActive: true });
+    if (isExistingBot) {
+      return res.status(404).send("User Bot Already Active");
+    }
+  }
   if (investment < 10)
     return res
       .status(400)
@@ -100,6 +106,7 @@ const createBot = asyncHandlerMiddleware(async (req, res) => {
       "setting",
       "availableBalance",
       "isActive",
+      "role",
     ])
   ).save();
 
@@ -170,13 +177,15 @@ const deleteBot = asyncHandlerMiddleware(async (req, res) => {
  @access    Private
  */
 const getUserBots = asyncHandlerMiddleware(async (req, res) => {
-  const filter = {};
+  const filter = {
+    isActive: true,
+  };
 
-  const user_id = req.params.user_id;
+  const user_id = req.params.id;
 
   if (user_id) filter["user"] = user_id;
 
-  const bots = await Bot.find(filter);
+  const bots = await Bot.find(filter).populate("setting");
   const _bots = await assignProfit(bots);
 
   res.status(200).send(_bots);
@@ -193,7 +202,11 @@ const openOrdersUserBots = asyncHandlerMiddleware(async (req, res) => {
   const user = req?.user?._id;
 
   if (user) filter["user"] = user;
-
+  console.log(req?.user);
+  if (req?.user?.role === "USER") {
+    filter["role"] = "User";
+    console.log(user);
+  }
   const openOrders = await Bot.find(filter).populate("setting");
   const bots = await assignProfit(openOrders);
 
