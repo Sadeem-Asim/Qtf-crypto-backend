@@ -320,8 +320,10 @@ const universalConversion = asyncHandlerMiddleware(async (req, res) => {
       APISECRET: secret,
       family: 4,
     });
-    // ${fromCoin}${toCoin}
-    const result = await binance.marketBuy("BNBBTC", quantity);
+
+    const result = await binance.marketBuy(`${fromCoin}${toCoin}`, quantity);
+    // const result = await binance.marketBuy("BNBBTC", quantity);
+
     // console.log(result.body);
     // binance.depth("BNBBTC", (error, depth, symbol) => {
     //   console.info(symbol + " market depth", depth);
