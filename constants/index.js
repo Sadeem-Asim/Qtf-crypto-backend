@@ -42,28 +42,28 @@ export const BINANCE_INTERVAL = [
   "1M",
 ];
 
-export const KUCOIN_SYMBOLS = ["BTC-USDT", "ETH-USDT"];
+// export const KUCOIN_SYMBOLS = ["BTC-USDT", "ETH-USDT"];
 
-export const KUCOIN_INTERVAL = [
-  "1min",
-  "3min",
-  "5min",
-  "15min",
-  "30min",
-  "1hour",
-  "2hour",
-  "4hour",
-  "6hour",
-  "8hour",
-  "12hour",
-  "1day",
-  "1week",
-];
+// export const KUCOIN_INTERVAL = [
+//   "1min",
+//   "3min",
+//   "5min",
+//   "15min",
+//   "30min",
+//   "1hour",
+//   "2hour",
+//   "4hour",
+//   "6hour",
+//   "8hour",
+//   "12hour",
+//   "1day",
+//   "1week",
+// ];
 
-export const ORIGINS = ["http://localhost:3000", "http://167.99.196.198"];
+export const ORIGINS = ["http://localhost:3000", "http://206.189.19.197"];
 export const SOCKET_ORIGINS = [
   "http://localhost:*",
-  "http://167.99.196.198:*",
+  "http://206.189.19.197:*",
   "https://cryptobot-backend.herokuapp.com:*",
 ];
 
@@ -75,5 +75,5 @@ export const DOMAIN = "http://167.99.196.198:5000/";
 // export const PYTHON_SERVER_BASE_URL = 'http://127.0.0.1:3030/'
 
 // KUCOINS CONSTANTS
-export const KUCOIN_API_BASE_URL = "https://api.kucoin.com";
+// export const KUCOIN_API_BASE_URL = "https://api.kucoin.com";
 export const ACCOUNT_INFORMATION_ENDPOINT = "/api/v1/accounts";
