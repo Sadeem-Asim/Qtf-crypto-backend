@@ -61,11 +61,7 @@ export const BINANCE_INTERVAL = [
 // ];
 
 export const ORIGINS = ["http://localhost:3000", "http://206.189.19.197"];
-export const SOCKET_ORIGINS = [
-  "http://localhost:*",
-  "http://206.189.19.197:*",
-  "https://cryptobot-backend.herokuapp.com:*",
-];
+export const SOCKET_ORIGINS = ["http://localhost:*", "http://206.189.19.197:*"];
 
 export const BINANCE_API_BASE_URL = "https://api.binance.com";
 
