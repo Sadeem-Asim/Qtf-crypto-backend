@@ -7,7 +7,7 @@ import fetchRSIValues from "#utils/taapi/fetchRSIValues";
 import _ from "lodash";
 import inRange from "#utils/common/inRange";
 import { BotSetting } from "#models/bot_setting.model";
-import { DefaultLogger, WebsocketClient } from "Binance";
+import { DefaultLogger, WebsocketClient } from "binance";
 
 export default function binanceLib() {
   const logger = {
