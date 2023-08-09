@@ -21,6 +21,7 @@ const binanceSockets = () => {
 
   const cb = _.debounce(
     async (symbol, interval, chart) => {
+      console.log("Hi");
       let tick = binance.last(chart);
       const currentPrice = _.round(chart[tick]?.close);
       // console.log({currentPrice})
@@ -127,7 +128,7 @@ const binanceSockets = () => {
 
                     // const buyCondition = inRange(currentPrice, min, max); // TODO:: OLD
                     const buyCondition = low === currentPrice;
-
+                    console.log("HI2");
                     //NOTE:: Buy Logic Block (TRAILING)
                     if (buyCondition) {
                       const buyOrderParams = {
@@ -313,7 +314,7 @@ const binanceSockets = () => {
     { maxWait: 500, trailing: true, leading: false }
   );
 
-  binance.websockets.chart(["BTCUSDT", "ETHUSDT"], "1m", cb);
+  binance.websockets.chart("BTCUSDT", "1m", cb);
 };
 
 export default binanceSockets;

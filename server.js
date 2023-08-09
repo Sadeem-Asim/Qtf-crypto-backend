@@ -9,7 +9,7 @@ import routes from "#routes/index";
 import { envConfig } from "#utils/common/env";
 import connectDB from "#config/db.config";
 import SocketServer from "#sockets/SocketServer";
-import binanceSockets from "#sockets/Binance";
+import binanceSockets from "#sockets/BinanceLib";
 import { SOCKET_ORIGINS } from "#constants/index";
 
 envConfig();
