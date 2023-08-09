@@ -30,7 +30,7 @@ export default function binanceLib() {
   wsClient.on("formattedMessage", (data) => {
     const { symbol, kline } = data;
     const { close } = kline;
-
+    // console.log(symbol);
     const currentPrice = _.round(close);
     const coin = symbol === "BTCUSDT" ? "BTC" : "ETH";
 
@@ -39,24 +39,11 @@ export default function binanceLib() {
   });
 
   wsClient.subscribeSpotKline("BTCUSDT", "1s");
-  /*eventEmitter.on("stats", (data) => {
-    const {ETH, BTC} = data;
-
-    if (ETH?.price > 0) {
-      const {price, symbol} = ETH;
-      const coin = symbol?.toUpperCase();
-      cb({currentPrice: price, coin, symbol: "ETHUSDT"})
-    } else {
-      const {price, symbol} = BTC;
-      const coin = symbol?.toUpperCase();
-      cb({currentPrice: price, coin, symbol: "BTCUSDT"})
-    }
-  });*/
+  wsClient.subscribeSpotKline("ETHUSDT", "1s");
 }
 
 const cb = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
-    console.log("HI");
     const bots = await Bot.aggregate([
       {
         $lookup: {
@@ -104,7 +91,7 @@ const cb = _.debounce(
 
             const stopCondition = currentPrice <= stop_at;
             const sellCondition = currentPrice >= up;
-
+            console.log("HI");
             //NOTE:: Automatic Bot Operations block
             if (operation === "AUTO") {
               // NOTE:: INDICATORS[1] = 'TRAILING'

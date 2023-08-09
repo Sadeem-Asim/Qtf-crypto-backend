@@ -310,7 +310,7 @@ const universalTransfer = asyncHandlerMiddleware(async (req, res) => {
 
 const universalConversion = asyncHandlerMiddleware(async (req, res) => {
   try {
-    const { id, fromCoin, toCoin, quantity } = req.body;
+    let { id, fromCoin, toCoin, quantity } = req.body;
     console.log(id, fromCoin, toCoin, quantity);
     const user = await UserModel.findById(id);
     const { apiKey, secret } = extractApiKeys(user?.api);
@@ -320,15 +320,25 @@ const universalConversion = asyncHandlerMiddleware(async (req, res) => {
       APISECRET: secret,
       family: 4,
     });
-
-    const result = await binance.marketBuy(`${fromCoin}${toCoin}`, quantity);
-    // const result = await binance.marketBuy("BNBBTC", quantity);
-
-    // console.log(result.body);
-    // binance.depth("BNBBTC", (error, depth, symbol) => {
-    //   console.info(symbol + " market depth", depth);
+    console.log(quantity);
+    // binance.allOrders("BTCUSDT", (error, orders, symbol) => {
+    //   console.info(symbol + " orders:", orders);
     // });
-    // console.log(result);
+
+    if (fromCoin === "USDT") {
+      const ticker = await binance.bookTickers(`${toCoin}${fromCoin}`);
+      console.info("bookTickers", ticker.bidPrice);
+      console.log(quantity / ticker.bidPrice);
+      quantity = quantity / ticker.bidPrice;
+      quantity = _.floor(quantity, 5);
+      const result = await binance.marketBuy(`${toCoin}${fromCoin}`, quantity);
+      console.log(result);
+    } else if (toCoin === "USDT") {
+      quantity = _.floor(quantity, 5);
+      console.log(quantity);
+      const result = await binance.marketSell(`${fromCoin}${toCoin}`, quantity);
+      console.log(result);
+    }
     res.status(200).send({ message: "Done" });
   } catch (error) {
     console.log(error.body);

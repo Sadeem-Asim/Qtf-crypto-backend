@@ -31,7 +31,6 @@ const getProfitLossAccountDetails = asyncHandlerMiddleware(async (req, res) => {
   if (coin_type) filter["coin_type"] = coin_type;
   if (id && role === "USER") {
     console.log("Hi");
-    1;
     filter["user"] = mongoose.Types.ObjectId(id);
     filter["role"] = "User";
   }
