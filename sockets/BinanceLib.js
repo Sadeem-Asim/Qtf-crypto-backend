@@ -8,6 +8,7 @@ import _ from "lodash";
 import inRange from "#utils/common/inRange";
 import { BotSetting } from "#models/bot_setting.model";
 import { DefaultLogger, WebsocketClient } from "binance";
+global.goToRsi = true;
 
 export default function binanceLib() {
   const logger = {
@@ -16,7 +17,6 @@ export default function binanceLib() {
       // console.log(params)
     },
   };
-
   const wsClient = new WebsocketClient(
     {
       beautify: true,
@@ -44,6 +44,7 @@ export default function binanceLib() {
 
 const cb = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
+    console.log("Hi");
     const bots = await Bot.aggregate([
       {
         $lookup: {
@@ -91,7 +92,6 @@ const cb = _.debounce(
 
             const stopCondition = currentPrice <= stop_at;
             const sellCondition = currentPrice >= up;
-            console.log("HI");
             //NOTE:: Automatic Bot Operations block
             if (operation === "AUTO") {
               // NOTE:: INDICATORS[1] = 'TRAILING'
