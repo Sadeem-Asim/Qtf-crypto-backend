@@ -22,7 +22,7 @@ logger();
 const app = express();
 binanceBtcSockets();
 // binanceEthSockets();
-CoinStats();
+// CoinStats();
 const PORT = process.env.PORT || 5000;
 
 /*****  Middlewares  *****/
