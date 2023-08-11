@@ -278,6 +278,6 @@ const cb = _.debounce(
         )
       : 0;
   },
-  1200,
+  3000,
   { maxWait: 2000, trailing: true }
 );
