@@ -27,7 +27,7 @@ export default function binanceLib() {
     logger
   );
 
-  wsClient.on("formattedMessage", (data) => {
+  wsClient.on("formattedMessage", async (data) => {
     const { symbol, kline } = data;
     const { close } = kline;
     // console.log(symbol);
@@ -35,7 +35,7 @@ export default function binanceLib() {
     const coin = symbol === "BTCUSDT" ? "BTC" : "ETH";
 
     // console.log({currentPrice, coin,symbol})
-    cb({ currentPrice, coin, symbol });
+    await cb({ currentPrice, coin, symbol });
   });
 
   wsClient.subscribeSpotKline("BTCUSDT", "1s");
@@ -126,11 +126,11 @@ const cb = _.debounce(
                 }
                 //NOTE:: Buy & Stop loss Logic Block (TRAILING)
                 else {
-                  // const min = symbol === 'ETHUSDT' ? low - 1 : low - 5;
-                  // const max = symbol === 'ETHUSDT' ? low + 1 : low + 5;
+                  const min = symbol === "ETHUSDT" ? low - 3 : low - 3;
+                  const max = symbol === "ETHUSDT" ? low + 3 : low + 3;
 
-                  // const buyCondition = inRange(currentPrice, min, max); // TODO:: OLD
-                  const buyCondition = low === currentPrice;
+                  const buyCondition = inRange(currentPrice, min, max);
+                  // const buyCondition = low === currentPrice;
 
                   //NOTE:: Buy Logic Block (TRAILING)
                   if (buyCondition) {
@@ -192,6 +192,7 @@ const cb = _.debounce(
                 else {
                   // const stopCondition = currentPrice <= stop_at;
                   const min = low - 5;
+                  console.log(min, low);
                   const buyCondition = inRange(_.round(rsi?.value), min, low); //NOTE:: RSI oversold condition
 
                   if (buyCondition) {
@@ -277,6 +278,6 @@ const cb = _.debounce(
         )
       : 0;
   },
-  800,
-  { maxWait: 1200, trailing: true }
+  1200,
+  { maxWait: 2000, trailing: true }
 );

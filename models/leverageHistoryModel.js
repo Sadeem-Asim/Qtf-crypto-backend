@@ -22,7 +22,7 @@ const LeverageHistorySchema = new mongoose.Schema(
       type: Number,
     },
     profit: {
-      type: String,
+      type: Number,
     },
     active: { type: Boolean, default: true },
   },

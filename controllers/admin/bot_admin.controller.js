@@ -45,9 +45,16 @@ const deleteBot = asyncHandlerMiddleware(async (req, res) => {
  @access   Private (Admin)
  */
 const botsActivity = asyncHandlerMiddleware(async (req, res) => {
-  const filter = {};
-
-  const users = await UserModel.find({ role: "USER" }, [
+  let filter = {
+    role: "User",
+  };
+  console.log(req?.user);
+  const { role } = req?.user;
+  if (role === "SUB_ADMIN") {
+    const subAdmin = await subAdminUsers.findOne({ sub_admin: req?.user?._id });
+    filter["_id"] = { $in: subAdmin?.users };
+  }
+  const users = await UserModel.find(filter, [
     "name",
     "email",
     "api",
@@ -55,7 +62,7 @@ const botsActivity = asyncHandlerMiddleware(async (req, res) => {
     "leverage",
   ]).lean();
   console.log(users);
-
+  filter = {};
   const updatedRecord = await Promise.all(
     users.map(async (user) => {
       const { _id, role } = user;

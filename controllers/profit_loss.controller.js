@@ -1,6 +1,7 @@
 import _ from "lodash";
 
 import { Bot } from "#models/bot.model";
+import { LeverageHistory } from "#models/leverageHistoryModel";
 import assignProfit from "#utils/common/assignProfit";
 import asyncHandlerMiddleware from "#middlewares/asyncHandler.middleware";
 import {
@@ -25,14 +26,17 @@ import mongoose from "mongoose";
 const getProfitLossAccountDetails = asyncHandlerMiddleware(async (req, res) => {
   const filter = {};
   const { _id: id, role } = req?.user || {};
+  console.log(req.user);
   const { currency, coin_type } = req?.query || {};
-  console.log(id);
+  // console.log(id);
+  // console.log(role);
+  // console.log(currency);
   if (currency) filter["coin"] = currency;
   if (coin_type) filter["coin_type"] = coin_type;
   if (id && role === "USER") {
     console.log("Hi");
     filter["user"] = mongoose.Types.ObjectId(id);
-    filter["role"] = "User";
+    // filter["role"] = "User";
   }
 
   const bots = await Bot.find(filter, {
@@ -42,7 +46,25 @@ const getProfitLossAccountDetails = asyncHandlerMiddleware(async (req, res) => {
     investment: 1,
     coin: 1,
   });
-  const runningOrders = await Bot.countDocuments({ ...filter, isActive: true });
+  let coin = `${currency}USDT`;
+  let leverages;
+  if (id && role === "USER") {
+    leverages = await LeverageHistory.find({
+      user: id,
+      coin: coin,
+    });
+  } else {
+    leverages = await LeverageHistory.find();
+  }
+
+  // console.log(leverages);
+
+  let leverageProfit = leverages.reduce(calculateTotalProfit, 0);
+  console.log("Leverages Profit : ", leverageProfit);
+  let runningOrders = await Bot.countDocuments({ ...filter, isActive: true });
+  if (runningOrders >= 1 && role === "USER") {
+    runningOrders = 1;
+  }
   const _bots = await assignProfit(bots);
 
   //  NOTE::  Winrate Calculation Portion
@@ -52,7 +74,8 @@ const getProfitLossAccountDetails = asyncHandlerMiddleware(async (req, res) => {
   const { profitDistributionData } = getProfitDistribution(bots, currency);
 
   //  NOTE::  Total Profit Price Calculation
-  const totalProfitPrice = _bots.reduce(calculateTotalProfit, 0);
+  let totalProfitPrice = _bots.reduce(calculateTotalProfit, 0);
+  totalProfitPrice = totalProfitPrice + leverageProfit;
   const totalRunningAssets = _bots.reduce(calculateTotalRunningAssets, 0);
 
   /*******    NOTE::      TOTAL PROFIT CHART      *********/
@@ -205,7 +228,7 @@ const getProfitLossAccountDetailsByUser = asyncHandlerMiddleware(
  */
 const userDashboard = asyncHandlerMiddleware(async (req, res) => {
   const filter = {
-    role: "User",
+    // role: "User",
   };
   const id = req?.user?._id;
   const exchange = req.query.exchange;
@@ -225,10 +248,13 @@ const userDashboard = asyncHandlerMiddleware(async (req, res) => {
     investment: 1,
     coin: 1,
   });
-  const totalRunningBots = await Bot.countDocuments({
+  let totalRunningBots = await Bot.countDocuments({
     ...filter,
     isActive: true,
   });
+  if (totalRunningBots >= 1) {
+    totalRunningBots = 1;
+  }
   const _bots = await assignProfit(bots);
 
   //  NOTE::  Profit Distribution && Asset Allocation Calculation

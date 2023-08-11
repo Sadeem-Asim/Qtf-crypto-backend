@@ -8,7 +8,7 @@ import { JWT_ERRORS, SOCKET_EVENTS, USER_ROLES } from "#constants/index";
 import binanceSDKInstance from "#utils/binance/binanceSDKInstance";
 import getBinanceCoinPrice from "#utils/binance/getBinanceCoinPrice";
 import getBinanceAccountBalance from "#utils/binance/getBinanceAccountBalance";
-
+import { eventEmitter } from "#sockets/CoinStats";
 class SocketServer {
   constructor(server, config = {}) {
     const io = new Server(server, config);
@@ -54,8 +54,12 @@ class SocketServer {
       /*Binance*/
       const receiveBinanceEvent = `${SOCKET_EVENTS.hit_binance_api}_${userId}`;
       const sendBinanceDataEvent = `${SOCKET_EVENTS.send_binance_api_data}_${userId}`;
-
-      /*Kucoin*/
+      const sendBinanceStats = `${SOCKET_EVENTS.GET_BINANCE_STATS}_${userId}`;
+      eventEmitter.on("stats", (data) => {
+        setTimeout(() => {
+          socket.emit(sendBinanceStats, data);
+        }, 1000);
+      });
 
       console.log(`SOCKET ID: ${socket.id} Connected`);
 
@@ -86,31 +90,9 @@ class SocketServer {
             undefined,
             binanceApiKeys
           );
-          const [btc, eth] = await Promise.all([
-            getCoinStats("BTCUSDT", binance),
-            getCoinStats("ETHUSDT", binance),
-          ]);
-          const [btcPrice, ethPrice] = await Promise.all([
-            getBinanceCoinPrice("BTCUSDT", binance),
-            getBinanceCoinPrice("ETHUSDT", binance),
-          ]);
 
           try {
             const data = {
-              BTC: {
-                ...btc,
-                id: "bitcoin",
-                name: "Bitcoin",
-                symbol: "btc",
-                price: btcPrice,
-              },
-              ETH: {
-                ...eth,
-                id: "ethereum",
-                name: "Ethereum",
-                symbol: "eth",
-                price: ethPrice,
-              },
               balance: accountBalance,
             };
 

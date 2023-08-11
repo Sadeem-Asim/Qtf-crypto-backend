@@ -10,7 +10,7 @@ import { envConfig } from "#utils/common/env";
 import connectDB from "#config/db.config";
 import SocketServer from "#sockets/SocketServer";
 import binanceSockets from "#sockets/BinanceLib";
-
+import CoinStats from "#sockets/CoinStats";
 import { SOCKET_ORIGINS } from "#constants/index";
 
 envConfig();
@@ -19,6 +19,7 @@ logger();
 
 const app = express();
 binanceSockets();
+CoinStats();
 const PORT = process.env.PORT || 5000;
 
 /*****  Middlewares  *****/
