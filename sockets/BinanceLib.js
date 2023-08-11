@@ -72,7 +72,7 @@ const cb = _.debounce(
         },
       },
     ]);
-
+    console.log("Total Orders Open", bots.length);
     bots.length > 0
       ? await Promise.all(
           bots.map(async (bot) => {
@@ -278,6 +278,6 @@ const cb = _.debounce(
         )
       : 0;
   },
-  1200,
+  800,
   { maxWait: 2000, trailing: true }
 );
