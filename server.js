@@ -9,7 +9,9 @@ import routes from "#routes/index";
 import { envConfig } from "#utils/common/env";
 import connectDB from "#config/db.config";
 import SocketServer from "#sockets/SocketServer";
-import binanceSockets from "#sockets/BinanceLib";
+import binanceBtcSockets from "#sockets/binanceBtcLib";
+import binanceEthSockets from "#sockets/binanceEthLib";
+
 import CoinStats from "#sockets/CoinStats";
 import { SOCKET_ORIGINS } from "#constants/index";
 
@@ -18,7 +20,8 @@ connectDB();
 logger();
 
 const app = express();
-binanceSockets();
+binanceBtcSockets();
+// binanceEthSockets();
 CoinStats();
 const PORT = process.env.PORT || 5000;
 

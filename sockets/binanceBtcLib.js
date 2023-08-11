@@ -39,12 +39,12 @@ export default function binanceLib() {
   });
 
   wsClient.subscribeSpotKline("BTCUSDT", "1s");
-  wsClient.subscribeSpotKline("ETHUSDT", "1s");
+  // wsClient.subscribeSpotKline("ETHUSDT", "1s");
 }
 
 const cb = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
-    console.log("Hi");
+    // console.log("Hi");
     const bots = await Bot.aggregate([
       {
         $lookup: {
@@ -72,7 +72,7 @@ const cb = _.debounce(
         },
       },
     ]);
-    console.log("Total Orders Open", bots.length);
+    console.log("Total Orders Open", bots.length, symbol);
     bots.length > 0
       ? await Promise.all(
           bots.map(async (bot) => {
