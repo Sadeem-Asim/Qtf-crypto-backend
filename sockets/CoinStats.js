@@ -47,7 +47,7 @@ export default function CoinStats() {
   wsClient.on("formattedMessage", (data) => {
     const key = data?.symbol === "BTCUSDT" ? "BTC" : "ETH";
     const isPriceEvent = data?.eventType === "trade";
-    console.log("Hello");
+    // console.log("Hello");
     if (isPriceEvent) {
       statistics[key]["price"] = data["price"];
     } else {

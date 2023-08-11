@@ -464,13 +464,18 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
       family: 4,
     });
     let result;
-    const allOrders = await binance.futuresAllOrders(coin);
+    // const allOrders = await binance.futuresAllOrders(coin);
     const risks = await binance.futuresPositionRisk();
     for (let risk of risks) {
       if (risk.symbol === coin) {
         result = risk;
         console.log(risk);
-        result.side = allOrders[allOrders.length - 1]?.side;
+        // result.side = allOrders[allOrders.length - 1]?.side;
+        if (Number(result.positionAmt) > 0) {
+          result.side = "BUY";
+        } else {
+          result.side = "SELL";
+        }
         break;
       }
     }

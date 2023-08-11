@@ -336,11 +336,14 @@ const paidHistory = asyncHandlerMiddleware(async (req, res) => {
 
   const calculateId = role === "ADMIN" ? undefined : id;
 
-  if (id && role === "USER") filter["user"] = id;
+  if (id && role === "USER") {
+    filter["user"] = id;
+    filter["role"] = "User";
+  }
   // if (coin) filter["coin"] = coin;
-
+  console.log(filter);
   const closeOrders = await Bot.countDocuments({ ...filter });
-
+  console.log(closeOrders);
   //  NOTE::  Billing Calculation & Data Portion
   const { billsData, amountPaid, amountUnpaid } = await getBills(calculateId);
 

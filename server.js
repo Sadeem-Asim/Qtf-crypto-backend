@@ -18,7 +18,7 @@ connectDB();
 logger();
 
 const app = express();
-binanceSockets();
+// binanceSockets();
 CoinStats();
 const PORT = process.env.PORT || 5000;
 

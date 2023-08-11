@@ -224,7 +224,10 @@ const closeOrdersUserBots = asyncHandlerMiddleware(async (req, res) => {
   const user = req?.user?._id;
 
   if (user) filter["user"] = user;
-
+  if (req?.user?.role === "USER") {
+    filter["role"] = "User";
+    console.log(user);
+  }
   if (req?.query?.currency) filter["currency"] = req?.query?.currency;
 
   console.log(filter);
