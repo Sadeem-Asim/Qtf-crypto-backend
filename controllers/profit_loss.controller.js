@@ -153,6 +153,17 @@ const getProfitLossAccountDetailsByUser = asyncHandlerMiddleware(
       investment: 1,
       coin: 1,
     });
+    let coin = `${currency}USDT`;
+
+    let leverages = await LeverageHistory.find({
+      user: id,
+      coin: coin,
+    });
+
+    // console.log(leverages);
+
+    let leverageProfit = leverages.reduce(calculateTotalProfit, 0);
+    // console.log("Leverages Profit : ", leverageProfit);
     const runningOrders = await Bot.countDocuments({
       ...filter,
       isActive: true,
@@ -166,7 +177,8 @@ const getProfitLossAccountDetailsByUser = asyncHandlerMiddleware(
     const { profitDistributionData } = getProfitDistribution(bots, currency);
 
     //  NOTE::  Total Profit Price Calculation
-    const totalProfitPrice = _bots.reduce(calculateTotalProfit, 0);
+    let totalProfitPrice = _bots.reduce(calculateTotalProfit, 0);
+    totalProfitPrice = totalProfitPrice + leverageProfit;
     const totalRunningAssets = _bots.reduce(calculateTotalRunningAssets, 0);
 
     /*******    NOTE::      TOTAL PROFIT CHART      *********/
