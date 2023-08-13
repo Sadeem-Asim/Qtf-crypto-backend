@@ -8,6 +8,8 @@ import asyncHandlerMiddleware from "#middlewares/asyncHandler.middleware";
 
 import { subAdminUsers } from "#models/sub_admin_users";
 import { Bot } from "#models/bot.model";
+import { calculateTotalProfit } from "#utils/common/calculations";
+import { LeverageHistory } from "#models/leverageHistoryModel";
 
 /**
  @desc     Register new UserModel
@@ -87,6 +89,7 @@ const getAllUser = asyncHandlerMiddleware(async (req, res) => {
 
   const _users = await Promise.all(
     users.map(async (user) => {
+      // console.log(user);
       const bots = await Bot.find({ user }).populate("setting");
       const record = await Bot.findOne(
         {},
@@ -100,7 +103,13 @@ const getAllUser = asyncHandlerMiddleware(async (req, res) => {
           setting.reduce((profit, row) => profit + row["profit"], 0)
         )
       );
+      let leverages = await LeverageHistory.find({
+        user: user._id,
+      });
 
+      let leverageProfit = leverages.reduce(calculateTotalProfit, 0);
+      // console.log("Leverages Profit : ", leverageProfit);
+      totalProfit.push(leverageProfit);
       return { ...user, profit: _.sum(totalProfit), createdDate: createdDate };
     })
   );

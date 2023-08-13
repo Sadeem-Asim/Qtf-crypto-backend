@@ -163,7 +163,7 @@ const getProfitLossAccountDetailsByUser = asyncHandlerMiddleware(
     // console.log(leverages);
 
     let leverageProfit = leverages.reduce(calculateTotalProfit, 0);
-    // console.log("Leverages Profit : ", leverageProfit);
+    console.log("Leverages Profit : ", leverageProfit);
     const runningOrders = await Bot.countDocuments({
       ...filter,
       isActive: true,
@@ -260,6 +260,15 @@ const userDashboard = asyncHandlerMiddleware(async (req, res) => {
     investment: 1,
     coin: 1,
   });
+
+  let leverages = await LeverageHistory.find({
+    user: id,
+  });
+
+  // console.log(leverages);
+
+  let leverageProfit = leverages.reduce(calculateTotalProfit, 0);
+  console.log("Leverages Profit : ", leverageProfit);
   let totalRunningBots = await Bot.countDocuments({
     ...filter,
     isActive: true,
@@ -275,7 +284,9 @@ const userDashboard = asyncHandlerMiddleware(async (req, res) => {
 
   const winrateData = getWinrate(_bots); //NOTE::Winrate
 
-  const totalProfitPrice = _bots.reduce(calculateTotalProfit, 0); //NOTE::Total Profit Price
+  let totalProfitPrice = _bots.reduce(calculateTotalProfit, 0);
+  totalProfitPrice = totalProfitPrice + leverageProfit;
+  //NOTE::Total Profit Price
   const totalRunningAssets = _bots.reduce(calculateTotalRunningAssets, 0); //NOTE::Total Running Assets
   const { billsData } = await getBills(id); //NOTE:: Bills Stats
 

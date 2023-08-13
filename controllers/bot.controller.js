@@ -12,6 +12,8 @@ import assignProfit from "#utils/common/assignProfit";
 import { EXCHANGES, INDICATORS, OPERATION } from "#constants/index";
 import closeSingleOrderBinance from "#utils/binance/closeSingleOrderBinance";
 import { subAdminUsers } from "#models/sub_admin_users";
+import { calculateTotalProfit } from "#utils/common/calculations";
+import { LeverageHistory } from "#models/leverageHistoryModel";
 
 /**
  @desc     Create Bot
@@ -203,12 +205,23 @@ const openOrdersUserBots = asyncHandlerMiddleware(async (req, res) => {
 
   if (user) filter["user"] = user;
   console.log(req?.user);
+  let leverageProfit = 0;
   if (req?.user?.role === "USER") {
     filter["role"] = "User";
     console.log(user);
+    let leverages = await LeverageHistory.find({
+      user: user,
+    });
+    leverageProfit = leverages.reduce(calculateTotalProfit, 0);
+    console.log("Leverages Profit : ", leverageProfit);
   }
   const openOrders = await Bot.find(filter).populate("setting");
   const bots = await assignProfit(openOrders);
+  if (bots[0].profit !== 0) {
+    bots[0].profit += leverageProfit;
+  } else if (bots[0].loss !== 0) {
+    bots[0].loss += leverageProfit;
+  }
 
   res.status(200).send(bots);
 });
