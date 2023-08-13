@@ -61,7 +61,7 @@ const botsActivity = asyncHandlerMiddleware(async (req, res) => {
     "role",
     "leverage",
   ]).lean();
-  console.log(users);
+  // console.log(users);
   filter = {};
   const updatedRecord = await Promise.all(
     users.map(async (user) => {
@@ -85,7 +85,7 @@ const botsActivity = asyncHandlerMiddleware(async (req, res) => {
 
       try {
         const { apiKey, secret } = extractApiKeys(user?.api);
-
+        console.log(user?.name);
         // Binance Api Kets
         if (apiKey || secret) {
           const params = getBinanceParams(undefined, secret);
@@ -96,21 +96,15 @@ const botsActivity = asyncHandlerMiddleware(async (req, res) => {
           //   console.log(data.balances);
           for (let balance of data?.balances) {
             switch (balance?.asset) {
-              case "BTC":
-                balances["btc"] = _.round(balance?.free, 2);
-                break;
-              case "ETH":
-                balances["eth"] = _.round(balance?.free, 2);
-                break;
               case "USDT":
                 balances["usdt"] = _.round(balance?.free, 2);
                 break;
               default:
             }
-            if (Object?.keys(balances)?.length === 3) break;
+            if (Object?.keys(balances)?.length === 1) break;
           }
           //   console.log(apiKey, secret);
-
+          // console.log(balances);
           const binance = new Binance().options({
             APIKEY: apiKey,
             APISECRET: secret,
@@ -121,27 +115,21 @@ const botsActivity = asyncHandlerMiddleware(async (req, res) => {
           for (let element of futureBalance) {
             // console.log(element);
             switch (element?.asset) {
-              case "BTC":
-                futureBalances["f_btc"] = _.round(element?.balance, 2);
-                break;
-              case "ETH":
-                futureBalances["f_eth"] = _.round(element?.balance, 2);
-                break;
               case "USDT":
                 futureBalances["f_usdt"] = _.round(element?.balance, 2);
                 break;
               default:
             }
-            if (Object?.keys(futureBalances)?.length === 3) break;
+            if (Object?.keys(futureBalances)?.length === 1) break;
           }
-          //   console.log(futureBalances);
+          // console.log(futureBalances);
         } else {
           throw new Error("Invalid api key provided");
         }
       } catch (e) {
         const error = e.response?.data || e;
-        // console.log( { error } );
-        balances["usdt"] = 0;
+        // console.log({ error });
+        // balances["usdt"] = 0;
         balances["btc"] = 0;
         balances["eth"] = 0;
       }

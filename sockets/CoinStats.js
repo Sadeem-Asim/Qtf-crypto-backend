@@ -24,7 +24,8 @@ export default function CoinStats() {
       api_key: API_KEY,
       api_secret: API_SECRET,
       beautify: true,
-      wsUrl: "wss://stream.binance.us:9443",
+      // wsUrl: "wss://stream.binance.us:9443",
+      weUrl: "wss://ws-api.binance.com:443/ws-api/v3",
       // Disable ping/pong ws heartbeat mechanism (not recommended)
       // disableHeartbeat: true
     },
@@ -60,6 +61,7 @@ export default function CoinStats() {
         low,
       };
     }
+    // console.log(statistics);
 
     eventEmitter.emit("stats", statistics);
     // console.log(statistics);

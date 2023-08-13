@@ -271,7 +271,7 @@ const getAvailableBalance = asyncHandlerMiddleware(async (req, res) => {
       //   console.log("FUTURE Account");
     }
   } catch (error) {
-    console.log(error);
+    console.log(error.body);
     res.status(500).send({ error: error });
   }
 });
@@ -303,7 +303,7 @@ const universalTransfer = asyncHandlerMiddleware(async (req, res) => {
     console.log(result);
     res.status(200).send({ message: "Done" });
   } catch (error) {
-    console.log(error);
+    console.log(error.body);
     throw new Error("This Function Requires Universal Transfer Permit");
   }
 });
