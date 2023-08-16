@@ -76,8 +76,8 @@ const updateUser = asyncHandlerMiddleware(async (req, res) => {
 const getAllUser = asyncHandlerMiddleware(async (req, res) => {
   const filter = { role: "USER" };
   const role = req.user?.role;
-  console.log(role);
-  console.log(req.user);
+  // console.log(role);
+  // console.log(req.user);
   if (role === "SUB_ADMIN") {
     const subAdmin = await subAdminUsers.findOne({ sub_admin: req?.user?._id });
     filter["_id"] = { $in: subAdmin?.users };
@@ -97,7 +97,18 @@ const getAllUser = asyncHandlerMiddleware(async (req, res) => {
         { sort: { createdAt: 1 } }
       );
       const { createdAt: createdDate } = record || {};
-
+      // const investment = bots.find((bot) => {
+      //   if (bot.role === "User") {
+      //     return bot;
+      //   }
+      // });
+      let investment = 0;
+      for (let i = 0; i < bots.length; i++) {
+        if (bots[i].role === "User") {
+          investment = bots[i].investment;
+          break;
+        }
+      }
       const totalProfit = await Promise.all(
         bots.map(async ({ setting }) =>
           setting.reduce((profit, row) => profit + row["profit"], 0)
@@ -109,8 +120,14 @@ const getAllUser = asyncHandlerMiddleware(async (req, res) => {
 
       let leverageProfit = leverages.reduce(calculateTotalProfit, 0);
       // console.log("Leverages Profit : ", leverageProfit);
+      // console.log(user);
       totalProfit.push(leverageProfit);
-      return { ...user, profit: _.sum(totalProfit), createdDate: createdDate };
+      return {
+        ...user,
+        profit: _.sum(totalProfit),
+        createdDate: createdDate,
+        investment,
+      };
     })
   );
 
