@@ -217,12 +217,18 @@ const openOrdersUserBots = asyncHandlerMiddleware(async (req, res) => {
   }
   const openOrders = await Bot.find(filter).populate("setting");
   const bots = await assignProfit(openOrders);
-  if (bots[0].profit !== 0) {
+  console.log(bots[0]);
+  if (bots[0].profit === 0 && bots[0].loss === 0) {
+    if (leverageProfit > 0) {
+      bots[0].profit += leverageProfit;
+    } else {
+      bots[0].loss += leverageProfit;
+    }
+  } else if (bots[0].profit !== 0) {
     bots[0].profit += leverageProfit;
   } else if (bots[0].loss !== 0) {
     bots[0].loss += leverageProfit;
   }
-
   res.status(200).send(bots);
 });
 

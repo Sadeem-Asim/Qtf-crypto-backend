@@ -102,10 +102,12 @@ const getAllUser = asyncHandlerMiddleware(async (req, res) => {
       //     return bot;
       //   }
       // });
+      let createdAt;
       let investment = 0;
       for (let i = 0; i < bots.length; i++) {
         if (bots[i].role === "User") {
           investment = bots[i].investment;
+          createdAt = bots[i].createdAt;
           break;
         }
       }
@@ -127,6 +129,7 @@ const getAllUser = asyncHandlerMiddleware(async (req, res) => {
         profit: _.sum(totalProfit),
         createdDate: createdDate,
         investment,
+        createdAt,
       };
     })
   );

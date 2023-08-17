@@ -54,7 +54,9 @@ const getProfitLossAccountDetails = asyncHandlerMiddleware(async (req, res) => {
       coin: coin,
     });
   } else {
-    leverages = await LeverageHistory.find();
+    leverages = await LeverageHistory.find({
+      coin: coin,
+    });
   }
 
   // console.log(leverages);

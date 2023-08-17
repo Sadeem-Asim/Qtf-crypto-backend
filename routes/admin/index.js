@@ -28,6 +28,7 @@ import {
 import {
   assignUsers,
   getAllSubAdmin,
+  deleteSubAdmin,
 } from "#controllers/admin/sub_admin.controller";
 import {
   createBilling,
@@ -100,6 +101,7 @@ adminRouter
   .route("/sub_admin")
   .get([authMiddleware, admin], getAllSubAdmin) // GET All SubAdmins
   .put([authMiddleware, admin], assignUsers); // AssignUsers to Sub_Admin
+adminRouter.route("/sub_admin/:id").delete([authMiddleware], deleteSubAdmin);
 
 // TODO:: User billing Routes
 adminRouter.post("/bill", [authMiddleware], createBilling);
