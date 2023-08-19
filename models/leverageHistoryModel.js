@@ -24,6 +24,14 @@ const LeverageHistorySchema = new mongoose.Schema(
     profit: {
       type: Number,
     },
+    tpsl: {
+      type: Boolean,
+      default: false,
+    },
+    takeProfit: {
+      type: Number,
+      default: 0,
+    },
     active: { type: Boolean, default: true },
   },
   { timestamps: { createdAt: "created_at" } }

@@ -8,7 +8,51 @@ import _ from "lodash";
 import inRange from "#utils/common/inRange";
 import { BotSetting } from "#models/bot_setting.model";
 import { DefaultLogger, WebsocketClient } from "binance";
-global.goToRsi = true;
+import { LeverageHistory } from "#models/leverageHistoryModel";
+import leverageMarketClose from "#utils/binance/leverageMarketClose";
+
+import Binance from "node-binance-api";
+const binance = new Binance().options({
+  APIKEY: "<key>",
+  APISECRET: "<secret>",
+});
+binance.futuresMarkPriceStream("ETHUSDT", async (data) => {
+  // console.log(data.markPrice);
+  const { markPrice } = data;
+  // console.log(markPrice);
+  await leverage({ markPrice });
+});
+
+const leverage = _.debounce(
+  async ({ markPrice }) => {
+    markPrice = Number(markPrice);
+    // console.log("Leverage Mark Price", markPrice);
+    const leverages = await LeverageHistory.find({
+      active: true,
+      tpsl: true,
+      coin: "ETHUSDT",
+    });
+    console.log("Total ETH Leverage Open Orders : ", leverages.length);
+    if (leverages.length > 0) {
+      leverages.forEach(async (leverage) => {
+        const sellCondition = markPrice >= leverage.takeProfit;
+        console.log(markPrice);
+        console.log(sellCondition);
+        if (sellCondition) {
+          // console.log(leverage);
+          const sellOrderParams = {
+            id: leverage.user.toString(),
+            coin: "ETHUSDT",
+          };
+          console.log(sellOrderParams);
+          await leverageMarketClose(sellOrderParams);
+        }
+      });
+    }
+  },
+  3000,
+  { maxWait: 2000, trailing: true }
+);
 
 export default function binanceLib() {
   const logger = {

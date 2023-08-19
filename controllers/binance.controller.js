@@ -377,7 +377,8 @@ const futurePrices = asyncHandlerMiddleware(async (req, res) => {
 
 const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
   try {
-    let { id, leverage, amount, reduceOnly, coin, type } = req.body;
+    let { id, leverage, amount, reduceOnly, coin, type, tpsl, takeProfit } =
+      req.body;
     const user = await UserModel.findById(id);
 
     const { apiKey, secret } = extractApiKeys(user?.api);
@@ -441,7 +442,16 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
         active: true,
       });
       if (!leverage) {
-        createLeverageStats(id, coin, response.side, buy, sell, 0);
+        createLeverageStats(
+          id,
+          coin,
+          response.side,
+          buy,
+          sell,
+          0,
+          tpsl,
+          takeProfit
+        );
       }
     }
 
@@ -488,11 +498,10 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
 
 const marketClose = asyncHandlerMiddleware(async (req, res) => {
   try {
-    let { id, quantity, coin, type, entryPrice, pnl } = req.body;
+    let { id, quantity, coin, type, pnl } = req.body;
     // entryPrice = _.round(entryPrice, 8);
-    console.log("entry", entryPrice);
     const user = await UserModel.findById(id);
-    console.log(entryPrice);
+    // console.log(entryPrice);
     const { apiKey, secret } = extractApiKeys(user?.api);
     console.log(apiKey, secret);
     const binance = new Binance().options({
@@ -615,7 +624,10 @@ async function createLeverageStats(
   side,
   buy = 0,
   sell = 0,
-  profit = 0
+  profit = 0,
+  tpsl = false,
+  takeProfit = 0,
+  stopLoss = 0
 ) {
   const newStat = await LeverageHistory.create({
     user: id,
@@ -624,6 +636,9 @@ async function createLeverageStats(
     buy,
     sell,
     profit,
+    tpsl,
+    takeProfit,
+    stopLoss,
   });
   console.log(newStat);
 }

@@ -4,12 +4,23 @@ import sellOrder from "#utils/binance/sellOrder";
 import stopBot from "#utils/binance/stopBot";
 import buyOrder from "#utils/binance/buyOrder";
 import fetchRSIValues from "#utils/taapi/fetchRSIValues";
+import leverageMarketClose from "#utils/binance/leverageMarketClose";
 import _ from "lodash";
 import inRange from "#utils/common/inRange";
 import { BotSetting } from "#models/bot_setting.model";
 import { DefaultLogger, WebsocketClient } from "binance";
-global.goToRsi = true;
-
+import { LeverageHistory } from "#models/leverageHistoryModel";
+import Binance from "node-binance-api";
+const binance = new Binance().options({
+  APIKEY: "<key>",
+  APISECRET: "<secret>",
+});
+binance.futuresMarkPriceStream("BTCUSDT", async (data) => {
+  // console.log(data.markPrice);
+  const { markPrice } = data;
+  // console.log(markPrice);
+  await leverage({ markPrice });
+});
 export default function binanceLib() {
   const logger = {
     ...DefaultLogger,
@@ -28,6 +39,7 @@ export default function binanceLib() {
   );
 
   wsClient.on("formattedMessage", async (data) => {
+    // console.log(data);
     const { symbol, kline } = data;
     const { close } = kline;
     // console.log(symbol);
@@ -37,11 +49,40 @@ export default function binanceLib() {
     // console.log({currentPrice, coin,symbol})
     await cb({ currentPrice, coin, symbol });
   });
-
+  // wsClient.subscribeTrades();
   wsClient.subscribeSpotKline("BTCUSDT", "1s");
   // wsClient.subscribeSpotKline("ETHUSDT", "1s");
 }
-
+const leverage = _.debounce(
+  async ({ markPrice }) => {
+    markPrice = Number(markPrice);
+    // console.log("Leverage Mark Price", markPrice);
+    const leverages = await LeverageHistory.find({
+      active: true,
+      tpsl: true,
+      coin: "BTCUSDT",
+    });
+    console.log("Total Btc Leverage Open Orders : ", leverages.length);
+    if (leverages.length > 0) {
+      leverages.forEach(async (leverage) => {
+        const sellCondition = markPrice >= leverage.takeProfit;
+        console.log(markPrice);
+        console.log(sellCondition);
+        if (sellCondition) {
+          // console.log(leverage);
+          const sellOrderParams = {
+            id: leverage.user.toString(),
+            coin: "BTCUSDT",
+          };
+          console.log(sellOrderParams);
+          await leverageMarketClose(sellOrderParams);
+        }
+      });
+    }
+  },
+  3000,
+  { maxWait: 2000, trailing: true }
+);
 const cb = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
     // console.log("Hi");
