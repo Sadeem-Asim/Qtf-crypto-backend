@@ -65,7 +65,12 @@ const leverage = _.debounce(
     console.log("Total Btc Leverage Open Orders : ", leverages.length);
     if (leverages.length > 0) {
       leverages.forEach(async (leverage) => {
-        const sellCondition = markPrice >= leverage.takeProfit;
+        let sellCondition = false;
+        if (leverage.side === "BUY") {
+          sellCondition = markPrice >= leverage.takeProfit;
+        } else if (leverage.side === "SELL") {
+          sellCondition = markPrice <= leverage.takeProfit;
+        }
         console.log(markPrice);
         console.log(sellCondition);
         if (sellCondition) {
