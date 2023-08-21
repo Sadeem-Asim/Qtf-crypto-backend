@@ -1,9 +1,10 @@
 import { DefaultLogger, WebsocketClient } from "binance";
 import EventEmitter from "events";
+import Binance from "node-binance-api";
 
 export const eventEmitter = new EventEmitter();
 
-export default function CoinStats() {
+export function CoinStats() {
   const statistics = {
     BTC: { id: "bitcoin", name: "Bitcoin", symbol: "btc" },
     ETH: { id: "ethereum", name: "Ethereum", symbol: "eth" },
@@ -91,4 +92,29 @@ export default function CoinStats() {
   wsClient.subscribeSpotSymbol24hrTicker("ETHUSDT");
   wsClient.subscribeSpotTrades("BTCUSDT");
   wsClient.subscribeSpotTrades("ETHUSDT");
+}
+
+export function FutureCoinStats() {
+  const binance = new Binance().options({
+    APIKEY: "<key>",
+    APISECRET: "<secret>",
+  });
+
+  binance.futuresMarkPriceStream("BTCUSDT", (data) => {
+    // statistics["BTC"]["futurePrice"] = data.markPrice;
+    // console.log(data.markPrice);
+    const stats = {
+      symbol: "BTC",
+      futurePrice: data.markPrice,
+    };
+    eventEmitter.emit("stats", stats);
+    // console.log(data);
+  });
+  binance.futuresMarkPriceStream("ETHUSDT", (data) => {
+    const stats = {
+      symbol: "ETH",
+      futurePrice: data.markPrice,
+    };
+    eventEmitter.emit("stats", stats);
+  });
 }

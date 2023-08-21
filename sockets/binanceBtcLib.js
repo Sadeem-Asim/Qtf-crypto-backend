@@ -11,17 +11,18 @@ import { BotSetting } from "#models/bot_setting.model";
 import { DefaultLogger, WebsocketClient } from "binance";
 import { LeverageHistory } from "#models/leverageHistoryModel";
 import Binance from "node-binance-api";
-const binance = new Binance().options({
-  APIKEY: "<key>",
-  APISECRET: "<secret>",
-});
-binance.futuresMarkPriceStream("BTCUSDT", async (data) => {
-  // console.log(data.markPrice);
-  const { markPrice } = data;
-  // console.log(markPrice);
-  await leverage({ markPrice });
-});
+
 export default function binanceLib() {
+  const binance = new Binance().options({
+    APIKEY: "<key>",
+    APISECRET: "<secret>",
+  });
+  binance.futuresMarkPriceStream("BTCUSDT", async (data) => {
+    // console.log(data.markPrice);
+    const { markPrice } = data;
+    // console.log(markPrice);
+    await leverage({ markPrice });
+  });
   const logger = {
     ...DefaultLogger,
     silly: (...params) => {

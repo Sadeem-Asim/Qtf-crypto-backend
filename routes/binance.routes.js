@@ -19,6 +19,8 @@ import {
   adjustMargin,
   getLeverageStats,
   universalConversion,
+  getActiveOrder,
+  updateTakeProfit,
 } from "#controllers/binance.controller";
 import authMiddleware from "#middlewares/auth.middleware";
 
@@ -35,6 +37,7 @@ binanceRoutes.get(
   authMiddleware,
   priceChangeIn24hrStatistics
 );
+binanceRoutes.get("/activeOrder/:id/:coin", authMiddleware, getActiveOrder);
 binanceRoutes.get("/all_orders", authMiddleware, getAllOrders);
 binanceRoutes.get("/balance", authMiddleware, getUSDTBalance);
 binanceRoutes.get("/testApi", testApi);
@@ -54,5 +57,6 @@ binanceRoutes.get(
   authMiddleware,
   getLeverageStats
 );
+binanceRoutes.put("/takeProfit", authMiddleware, updateTakeProfit);
 binanceRoutes.post("/convert", authMiddleware, universalConversion);
 export default binanceRoutes;

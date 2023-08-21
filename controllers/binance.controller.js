@@ -617,6 +617,46 @@ function truncateToDecimals(num, dec = 3) {
   calcDec = Math.trunc(num * calcDec) / calcDec;
   return calcDec;
 }
+const getActiveOrder = asyncHandlerMiddleware(async (req, res) => {
+  try {
+    const { id, coin } = req.params;
+    console.log(id);
+    const order = await LeverageHistory.findOne({
+      user: id,
+      active: true,
+      coin: coin,
+    });
+    console.log(order);
+    if (!order) {
+      res.status(200).send({ message: "No Active Order" });
+    } else {
+      res.status(200).send({ message: "Done", order });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({ status: "Error", message: error.message });
+  }
+});
+const updateTakeProfit = asyncHandlerMiddleware(async (req, res) => {
+  try {
+    const { id, tpsl, takeProfit } = req.body;
+    console.log(id);
+    const order = await LeverageHistory.findByIdAndUpdate(
+      id,
+      { tpsl: tpsl, takeProfit: takeProfit },
+      { new: true }
+    );
+    console.log(order);
+    if (!order) {
+      res.status(200).send({ message: "No Updated Order" });
+    } else {
+      res.status(200).send({ message: "Done" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({ status: "Error", message: error.message });
+  }
+});
 
 async function createLeverageStats(
   id,
@@ -646,6 +686,7 @@ async function createLeverageStats(
 export {
   newOrder,
   exchangeInfo,
+  getActiveOrder,
   priceTickler,
   getAllOrders,
   getUSDTBalance,
@@ -663,4 +704,5 @@ export {
   adjustMargin,
   getLeverageStats,
   universalConversion,
+  updateTakeProfit,
 };

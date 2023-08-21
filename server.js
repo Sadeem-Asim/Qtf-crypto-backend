@@ -12,7 +12,7 @@ import SocketServer from "#sockets/SocketServer";
 import binanceBtcSockets from "#sockets/binanceBtcLib";
 import binanceEthSockets from "#sockets/binanceEthLib";
 
-import CoinStats from "#sockets/CoinStats";
+import { CoinStats, FutureCoinStats } from "#sockets/CoinStats";
 import { SOCKET_ORIGINS } from "#constants/index";
 
 envConfig();
@@ -23,6 +23,7 @@ const app = express();
 binanceBtcSockets();
 binanceEthSockets();
 CoinStats();
+FutureCoinStats();
 const PORT = process.env.PORT || 5000;
 
 /*****  Middlewares  *****/
