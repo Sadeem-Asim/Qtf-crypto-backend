@@ -10,6 +10,7 @@ import asyncHandlerMiddleware from "#middlewares/asyncHandler.middleware";
 import binanceCloseOrder from "#utils/binance/binanceCloseOrder";
 import Binance from "node-binance-api";
 import _ from "lodash";
+import createProfitForLeverage from "#utils/profit_loss/createProfitForLeverage";
 /**
  @desc     Binance Balances
  @route    GET /api/binance/balance
@@ -474,6 +475,7 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
       family: 4,
     });
     let result;
+
     // const allOrders = await binance.futuresAllOrders(coin);
     const risks = await binance.futuresPositionRisk();
     for (let risk of risks) {
@@ -541,6 +543,7 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
           leverage.active = false;
           leverage.save();
           console.log(leverage);
+          createProfitForLeverage(id, coin, pnl);
         }
       } else if (type === "SELL") {
         const leverage = await LeverageHistory.findOne({
@@ -555,6 +558,7 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
           leverage.active = false;
           leverage.save();
           console.log(leverage);
+          createProfitForLeverage(id, coin, pnl);
         }
       }
     }

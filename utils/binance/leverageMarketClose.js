@@ -2,6 +2,7 @@ import { UserModel } from "#models/user.model";
 import { LeverageHistory } from "#models/leverageHistoryModel";
 import Binance from "node-binance-api";
 import extractApiKeys from "#utils/common/extractApiKeys";
+import createProfitForLeverage from "#utils/profit_loss/createProfitForLeverage";
 
 const leverageMarketClose = async ({ id, coin }) => {
   try {
@@ -66,6 +67,7 @@ const leverageMarketClose = async ({ id, coin }) => {
           leverage.active = false;
           leverage.save();
           console.log(leverage);
+          createProfitForLeverage(id, coin, pnl);
         }
       } else if (type === "SELL") {
         const leverage = await LeverageHistory.findOne({
@@ -80,6 +82,7 @@ const leverageMarketClose = async ({ id, coin }) => {
           leverage.active = false;
           leverage.save();
           console.log(leverage);
+          createProfitForLeverage(id, coin, pnl);
         }
       }
     }
