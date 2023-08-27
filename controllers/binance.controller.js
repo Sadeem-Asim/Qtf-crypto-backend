@@ -378,8 +378,17 @@ const futurePrices = asyncHandlerMiddleware(async (req, res) => {
 
 const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
   try {
-    let { id, leverage, amount, reduceOnly, coin, type, tpsl, takeProfit } =
-      req.body;
+    let {
+      id,
+      leverage,
+      amount,
+      reduceOnly,
+      coin,
+      type,
+      tpsl,
+      takeProfit,
+      balance,
+    } = req.body;
     const user = await UserModel.findById(id);
 
     const { apiKey, secret } = extractApiKeys(user?.api);
@@ -451,7 +460,8 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
           sell,
           0,
           tpsl,
-          takeProfit
+          takeProfit,
+          balance
         );
       }
     }
@@ -500,7 +510,7 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
 
 const marketClose = asyncHandlerMiddleware(async (req, res) => {
   try {
-    let { id, quantity, coin, type, pnl } = req.body;
+    let { id, quantity, coin, type } = req.body;
     // entryPrice = _.round(entryPrice, 8);
     const user = await UserModel.findById(id);
     // console.log(entryPrice);
@@ -538,6 +548,16 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
           active: true,
         });
         if (leverage) {
+          let balanceAfterMarketClose = 0;
+          const futureBalance = await binance.futuresBalance();
+          for (let i = 0; i < futureBalance.length; i++) {
+            if (futureBalance[i].asset === "USDT") {
+              balanceAfterMarketClose = futureBalance[i].balance;
+              console.log("Future Balance : ", futureBalance[i].balance);
+              break;
+            }
+          }
+          let pnl = balanceAfterMarketClose - leverage.balance;
           leverage.sell = response.avgPrice;
           leverage.profit = pnl;
           leverage.active = false;
@@ -553,6 +573,16 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
           active: true,
         });
         if (leverage) {
+          let balanceAfterMarketClose = 0;
+          const futureBalance = await binance.futuresBalance();
+          for (let i = 0; i < futureBalance.length; i++) {
+            if (futureBalance[i].asset === "USDT") {
+              balanceAfterMarketClose = futureBalance[i].balance;
+              console.log("Future Balance : ", futureBalance[i].balance);
+              break;
+            }
+          }
+          let pnl = balanceAfterMarketClose - leverage.balance;
           leverage.buy = response.avgPrice;
           leverage.profit = pnl;
           leverage.active = false;
@@ -671,7 +701,7 @@ async function createLeverageStats(
   profit = 0,
   tpsl = false,
   takeProfit = 0,
-  stopLoss = 0
+  balance = 0
 ) {
   const newStat = await LeverageHistory.create({
     user: id,
@@ -682,7 +712,7 @@ async function createLeverageStats(
     profit,
     tpsl,
     takeProfit,
-    stopLoss,
+    balance,
   });
   console.log(newStat);
 }
