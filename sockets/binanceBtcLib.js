@@ -72,13 +72,14 @@ const leverage = _.debounce(
         } else if (leverage.side === "SELL") {
           sellCondition = markPrice <= leverage.takeProfit;
         }
-        console.log(markPrice);
-        console.log(sellCondition);
+        // console.log(sellCondition);
         if (sellCondition) {
           // console.log(leverage);
+          console.log(markPrice);
           const sellOrderParams = {
             id: leverage.user.toString(),
             coin: "BTCUSDT",
+            // leverage,
           };
           console.log(sellOrderParams);
           await leverageMarketClose(sellOrderParams);

@@ -674,10 +674,14 @@ const getActiveOrder = asyncHandlerMiddleware(async (req, res) => {
 const updateTakeProfit = asyncHandlerMiddleware(async (req, res) => {
   try {
     const { id, tpsl, takeProfit } = req.body;
+    console.log(req.body);
+    let { addBalance } = req.body || 0;
+    console.log(addBalance);
+    addBalance = Number(addBalance);
     console.log(id);
     const order = await LeverageHistory.findByIdAndUpdate(
       id,
-      { tpsl: tpsl, takeProfit: takeProfit },
+      { tpsl: tpsl, takeProfit: takeProfit, $inc: { balance: addBalance } },
       { new: true }
     );
     console.log(order);

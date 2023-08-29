@@ -32,7 +32,7 @@ const leverageMarketClose = async ({ id, coin }) => {
       }
     }
     let quantity = result.positionAmt;
-    let pnl = result.unRealizedProfit;
+    // let pnl = result.unRealizedProfit;
     let type = result.side;
     // entryPrice = _.round(entryPrice, 8);
     let response = {};
@@ -62,6 +62,16 @@ const leverageMarketClose = async ({ id, coin }) => {
           active: true,
         });
         if (leverage) {
+          let balanceAfterMarketClose = 0;
+          const futureBalance = await binance.futuresBalance();
+          for (let i = 0; i < futureBalance.length; i++) {
+            if (futureBalance[i].asset === "USDT") {
+              balanceAfterMarketClose = futureBalance[i].balance;
+              console.log("Future Balance : ", futureBalance[i].balance);
+              break;
+            }
+          }
+          let pnl = balanceAfterMarketClose - leverage.balance;
           leverage.sell = response.avgPrice;
           leverage.profit = pnl;
           leverage.active = false;
@@ -77,6 +87,16 @@ const leverageMarketClose = async ({ id, coin }) => {
           active: true,
         });
         if (leverage) {
+          let balanceAfterMarketClose = 0;
+          const futureBalance = await binance.futuresBalance();
+          for (let i = 0; i < futureBalance.length; i++) {
+            if (futureBalance[i].asset === "USDT") {
+              balanceAfterMarketClose = futureBalance[i].balance;
+              console.log("Future Balance : ", futureBalance[i].balance);
+              break;
+            }
+          }
+          let pnl = balanceAfterMarketClose - leverage.balance;
           leverage.buy = response.avgPrice;
           leverage.profit = pnl;
           leverage.active = false;
