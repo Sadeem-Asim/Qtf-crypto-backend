@@ -71,7 +71,7 @@ const leverageMarketClose = async ({ id, coin }) => {
               break;
             }
           }
-          let pnl = balanceAfterMarketClose - leverage.balance;
+          let pnl = Number(balanceAfterMarketClose) - leverage.balance;
           leverage.sell = response.avgPrice;
           leverage.profit = pnl;
           leverage.active = false;
@@ -96,7 +96,7 @@ const leverageMarketClose = async ({ id, coin }) => {
               break;
             }
           }
-          let pnl = balanceAfterMarketClose - leverage.balance;
+          let pnl = Number(balanceAfterMarketClose) - leverage.balance;
           leverage.buy = response.avgPrice;
           leverage.profit = pnl;
           leverage.active = false;
