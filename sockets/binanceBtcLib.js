@@ -68,8 +68,20 @@ const leverage = _.debounce(
       leverages.forEach(async (leverage) => {
         let sellCondition = false;
         if (leverage.side === "BUY") {
+          let bookProfit = inRange(
+            markPrice,
+            leverage.takeProfit + 5,
+            leverage.takeProfit
+          );
+          console.log(bookProfit);
           sellCondition = markPrice >= leverage.takeProfit;
         } else if (leverage.side === "SELL") {
+          let bookProfit = inRange(
+            markPrice,
+            leverage.takeProfit - 5,
+            leverage.takeProfit
+          );
+          console.log(bookProfit);
           sellCondition = markPrice <= leverage.takeProfit;
         }
         // console.log(sellCondition);
@@ -82,7 +94,7 @@ const leverage = _.debounce(
             // leverage,
           };
           console.log(sellOrderParams);
-          await leverageMarketClose(sellOrderParams);
+          // await leverageMarketClose(sellOrderParams);
         }
       });
     }
