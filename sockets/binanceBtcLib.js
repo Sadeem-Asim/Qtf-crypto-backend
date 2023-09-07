@@ -21,7 +21,7 @@ export default function binanceLib() {
     // console.log(data.markPrice);
     const { markPrice } = data;
     // console.log(markPrice);
-    // await leverage({ markPrice });
+    await leverage({ markPrice });
   });
   const logger = {
     ...DefaultLogger,
