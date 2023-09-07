@@ -79,7 +79,7 @@ const sellOrder = async (
       } else {
         //NOTE:: Updating BotSetting in RSI and Trailing Configuration
         await BotSetting.findByIdAndUpdate(setting_id, {
-          $set: { hasPurchasedCoins: false, isActive: false },
+          $set: { hasPurchasedCoins: false },
           $inc: { profit: profit },
           $unset: { raw: 1 },
           $push: { "stats.sell": Number(price) },

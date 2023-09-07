@@ -21,7 +21,7 @@ export default function binanceLib() {
     // console.log(data.markPrice);
     const { markPrice } = data;
     // console.log(markPrice);
-    await leverage({ markPrice });
+    // await leverage({ markPrice });
   });
   const logger = {
     ...DefaultLogger,
@@ -150,10 +150,12 @@ const cb = _.debounce(
               } = setting;
 
               const stopCondition = currentPrice <= stop_at;
+              // console.log(stopCondition, stop_at);
               const sellCondition = currentPrice >= up;
               //NOTE:: Automatic Bot Operations block
               if (operation === "AUTO") {
                 // NOTE:: INDICATORS[1] = 'TRAILING'
+                // return;
                 if (indicator === INDICATORS[1]) {
                   // NOTE:: TRAILING LOGGER
                   console.log(
@@ -180,7 +182,7 @@ const cb = _.debounce(
                       };
                       await sellOrder(sellOrderParams, { raw, investment });
                     } else if (stopCondition) {
-                      await stopBot({ setting_id, currentPrice });
+                      // await stopBot({ setting_id, currentPrice });
                     }
                   }
                   //NOTE:: Buy & Stop loss Logic Block (TRAILING)
@@ -205,11 +207,12 @@ const cb = _.debounce(
                     }
                     //NOTE::Stop loss Logic Block
                     else if (stopCondition) {
-                      await stopBot({ setting_id, currentPrice });
+                      // await stopBot({ setting_id, currentPrice });
                     }
                   }
                 } else if (indicator === INDICATORS[0]) {
                   // NOTE:: INDICATORS[0] = 'RSI' Block
+                  // return;
                   const params = {
                     exchange: EXCHANGES[0], // binance
                     symbol: symbol.replace("USDT", "/USDT"),
@@ -244,7 +247,7 @@ const cb = _.debounce(
                       };
                       await sellOrder(sellOrderParams, { raw, investment });
                     } else if (stopCondition) {
-                      await stopBot({ setting_id, currentPrice });
+                      // await stopBot({ setting_id, currentPrice });
                     }
                   }
                   //NOTE:: Buy & Stop loss Logic Block (RSI)
@@ -267,13 +270,15 @@ const cb = _.debounce(
                     }
                     //NOTE::Stop loss Logic Block
                     else if (stopCondition) {
-                      await stopBot({ setting_id, currentPrice });
+                      // await stopBot({ setting_id, currentPrice });
                     }
                   }
                 }
               } // Manual Bot Block
               else {
                 // NOTE:: MANUAL LOGGER
+                // return;
+
                 console.log(
                   {
                     u: up,
@@ -285,10 +290,11 @@ const cb = _.debounce(
                   "M"
                 );
 
-                const min = symbol === "ETHUSDT" ? low - 2 : low - 2;
+                const min = symbol === "ETHUSDT" ? low - 2 : low - 5;
                 const max = symbol === "ETHUSDT" ? low : low;
                 const buyCondition = inRange(currentPrice, min, max);
                 // const buyCondition = low === currentPrice;
+                // console.log(buyCondition);
                 if (hasPurchasedCoins) {
                   const takePriceCondition =
                     currentPrice === takeProfit && takeProfit !== 0;
@@ -323,7 +329,7 @@ const cb = _.debounce(
                       investment: 0,
                     });
                   } else if (stopCondition) {
-                    await stopBot({ setting_id, currentPrice });
+                    // await stopBot({ setting_id, currentPrice });
                   }
                 } else if (buyCondition) {
                   const buyOrderParams = {
@@ -336,7 +342,7 @@ const cb = _.debounce(
                   };
                   await buyOrder(buyOrderParams);
                 } else if (stopCondition) {
-                  await stopBot({ setting_id, currentPrice });
+                  // await stopBot({ setting_id, currentPrice });
                 }
               }
             })
@@ -346,6 +352,6 @@ const cb = _.debounce(
       console.log(error);
     }
   },
-  3000,
+  1200,
   { maxWait: 2000, trailing: true }
 );

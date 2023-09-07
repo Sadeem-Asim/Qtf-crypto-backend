@@ -85,7 +85,7 @@ const botsActivity = asyncHandlerMiddleware(async (req, res) => {
 
       try {
         const { apiKey, secret } = extractApiKeys(user?.api);
-        console.log(user?.name);
+        // console.log(user?.name);
         // Binance Api Kets
         if (apiKey || secret) {
           const params = getBinanceParams(undefined, secret);
