@@ -134,7 +134,7 @@ const cb = _.debounce(
                     };
                     await sellOrder(sellOrderParams, { raw, investment });
                   } else if (stopCondition) {
-                    await stopBot({ setting_id, currentPrice });
+                    // await stopBot({ setting_id, currentPrice });
                   }
                 }
                 //NOTE:: Buy & Stop loss Logic Block (TRAILING)
@@ -159,7 +159,7 @@ const cb = _.debounce(
                   }
                   //NOTE::Stop loss Logic Block
                   else if (stopCondition) {
-                    await stopBot({ setting_id, currentPrice });
+                    // await stopBot({ setting_id, currentPrice });
                   }
                 }
               } else if (indicator === INDICATORS[0]) {
@@ -198,7 +198,7 @@ const cb = _.debounce(
                     };
                     await sellOrder(sellOrderParams, { raw, investment });
                   } else if (stopCondition) {
-                    await stopBot({ setting_id, currentPrice });
+                    // await stopBot({ setting_id, currentPrice });
                   }
                 }
                 //NOTE:: Buy & Stop loss Logic Block (RSI)
@@ -221,7 +221,7 @@ const cb = _.debounce(
                   }
                   //NOTE::Stop loss Logic Block
                   else if (stopCondition) {
-                    await stopBot({ setting_id, currentPrice });
+                    // await stopBot({ setting_id, currentPrice });
                   }
                 }
               }
@@ -271,7 +271,7 @@ const cb = _.debounce(
                     investment: 0,
                   });
                 } else if (stopCondition) {
-                  await stopBot({ setting_id, currentPrice });
+                  // await stopBot({ setting_id, currentPrice });
                 }
               } else if (buyCondition) {
                 const buyOrderParams = {
@@ -284,7 +284,7 @@ const cb = _.debounce(
                 };
                 await buyOrder(buyOrderParams);
               } else if (stopCondition) {
-                await stopBot({ setting_id, currentPrice });
+                // await stopBot({ setting_id, currentPrice });
               }
             }
           })

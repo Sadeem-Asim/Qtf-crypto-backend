@@ -2,6 +2,7 @@ import axios from "axios";
 import binanceApi from "#services/binance";
 import { UserModel } from "#models/user.model";
 import { LeverageHistory } from "#models/leverageHistoryModel";
+import { Profit } from "#models/ProfitModel";
 import extractApiKeys from "#utils/common/extractApiKeys";
 import handleBotStatus from "#utils/common/handleBotStatus";
 import getBinanceParams from "#utils/binance/getBinanceParams";
@@ -637,7 +638,7 @@ const getLeverageStats = asyncHandlerMiddleware(async (req, res) => {
           sell.push(leverage);
         }
       });
-      console.log(leverages);
+      // console.log(leverages);
       res.status(200).send({ message: "Done", buy, sell });
     }
   } catch (error) {
@@ -696,6 +697,30 @@ const updateTakeProfit = asyncHandlerMiddleware(async (req, res) => {
   }
 });
 
+const updateProfit = asyncHandlerMiddleware(async (req, res) => {
+  try {
+    const { id, profit } = req.body;
+    console.log(req.body);
+    console.log(id);
+    const order = await LeverageHistory.findById(id);
+    const profitOrder = await Profit.findOneAndUpdate(
+      { value: order.profit },
+      { value: profit },
+      { new: true }
+    );
+    order.profit = profit;
+    order.save();
+    if (!order) {
+      res.status(200).send({ message: "No Updated Order" });
+    } else {
+      res.status(200).send({ message: "Done" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({ status: "Error", message: error.message });
+  }
+});
+
 async function createLeverageStats(
   id,
   coin,
@@ -743,4 +768,5 @@ export {
   getLeverageStats,
   universalConversion,
   updateTakeProfit,
+  updateProfit,
 };
