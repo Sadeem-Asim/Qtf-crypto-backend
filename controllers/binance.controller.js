@@ -353,7 +353,7 @@ const futurePrices = asyncHandlerMiddleware(async (req, res) => {
     const { id } = req.params;
     const user = await UserModel.findById(id);
     const { apiKey, secret } = extractApiKeys(user?.api);
-    console.log(apiKey, secret);
+    // console.log(apiKey, secret);
     const binance = new Binance().options({
       APIKEY: apiKey,
       APISECRET: secret,

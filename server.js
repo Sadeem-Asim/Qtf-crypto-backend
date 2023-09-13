@@ -11,14 +11,14 @@ import connectDB from "#config/db.config";
 import SocketServer from "#sockets/SocketServer";
 import binanceBtcSockets from "#sockets/binanceBtcLib";
 import binanceEthSockets from "#sockets/binanceEthLib";
-
+// import deleteProfit from "./deleteProfits.js";
 import { CoinStats, FutureCoinStats } from "#sockets/CoinStats";
 import { SOCKET_ORIGINS } from "#constants/index";
 
 envConfig();
 connectDB();
 logger();
-
+// deleteProfit();
 const app = express();
 binanceBtcSockets();
 binanceEthSockets();

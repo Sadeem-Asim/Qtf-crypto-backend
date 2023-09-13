@@ -113,7 +113,15 @@ const sellOrder = async (
       const _error = _.get(error, "response.data.msg", error);
       myLogger.binanceError.error("Sell Order Failed");
       myLogger.binanceError.error(JSON.stringify(error));
-      console.log(_error, "Sell Order Failed");
+      console.log(
+        _error,
+        "Sell Order Failed",
+        symbol,
+        quantity,
+        bot_id,
+        user_id,
+        setting_id
+      );
     });
 };
 
