@@ -704,7 +704,7 @@ const updateProfit = asyncHandlerMiddleware(async (req, res) => {
     console.log(id);
     const order = await LeverageHistory.findById(id);
     const profitOrder = await Profit.findOneAndUpdate(
-      { value: order.profit },
+      { value: order.profit, user: order.user },
       { value: profit },
       { new: true }
     );
