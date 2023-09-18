@@ -36,9 +36,11 @@ const LeverageHistorySchema = new mongoose.Schema(
     },
     buy: {
       type: Number,
+      default: 0,
     },
     sell: {
       type: Number,
+      default: 0,
     },
     profit: {
       type: Number,

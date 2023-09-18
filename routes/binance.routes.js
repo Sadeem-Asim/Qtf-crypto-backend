@@ -23,6 +23,7 @@ import {
   updateTakeProfit,
   updateProfit,
   futureLimitBuySell,
+  deleteOrder,
 } from "#controllers/binance.controller";
 import authMiddleware from "#middlewares/auth.middleware";
 
@@ -44,6 +45,8 @@ binanceRoutes.get(
   authMiddleware,
   getActiveOrder
 );
+binanceRoutes.delete("/activeOrder/:id", authMiddleware, deleteOrder);
+
 binanceRoutes.get("/all_orders", authMiddleware, getAllOrders);
 binanceRoutes.get("/balance", authMiddleware, getUSDTBalance);
 binanceRoutes.get("/testApi", testApi);

@@ -451,6 +451,7 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
         user: id,
         coin,
         active: true,
+        hasPurchasedCoins: true,
       });
       if (!leverage) {
         createLeverageStats(
@@ -497,12 +498,7 @@ const futureLimitBuySell = asyncHandlerMiddleware(async (req, res) => {
       APISECRET: secret,
       family: 4,
     });
-    const futurePrices = await binance.futuresPrices();
-    let futurePrice = futurePrices[coin];
-    // console.log(futurePrice);
-    let quantity = (amount * leverage) / futurePrice;
-    quantity = truncateToDecimals(quantity);
-    console.log(quantity);
+
     console.log("Type : ", type);
     console.log(side);
 
@@ -772,6 +768,21 @@ const getActiveOrder = asyncHandlerMiddleware(async (req, res) => {
     res.status(400).send({ status: "Error", message: error.message });
   }
 });
+
+const deleteOrder = asyncHandlerMiddleware(async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(id);
+
+    await LeverageHistory.findByIdAndDelete(id);
+
+    res.status(200).send({ message: "Done" });
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({ status: "Error", message: error.message });
+  }
+});
+
 const updateTakeProfit = asyncHandlerMiddleware(async (req, res) => {
   try {
     const { id, tpsl, takeProfit } = req.body;
@@ -870,4 +881,5 @@ export {
   universalConversion,
   updateTakeProfit,
   updateProfit,
+  deleteOrder,
 };
