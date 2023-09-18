@@ -16,6 +16,24 @@ const LeverageHistorySchema = new mongoose.Schema(
       enum: ["BUY", "SELL"],
     },
     balance: { type: Number },
+    type: {
+      type: String,
+      enum: ["Market", "Limit"],
+      default: "Market",
+    },
+    hasPurchasedCoins: {
+      type: Boolean,
+      default: true,
+    },
+    leverage: {
+      type: Number,
+    },
+    price: {
+      type: Number,
+    },
+    amount: {
+      type: Number,
+    },
     buy: {
       type: Number,
     },
@@ -24,6 +42,7 @@ const LeverageHistorySchema = new mongoose.Schema(
     },
     profit: {
       type: Number,
+      default: 0,
     },
     tpsl: {
       type: Boolean,

@@ -22,6 +22,7 @@ import {
   getActiveOrder,
   updateTakeProfit,
   updateProfit,
+  futureLimitBuySell,
 } from "#controllers/binance.controller";
 import authMiddleware from "#middlewares/auth.middleware";
 
@@ -38,7 +39,11 @@ binanceRoutes.get(
   authMiddleware,
   priceChangeIn24hrStatistics
 );
-binanceRoutes.get("/activeOrder/:id/:coin", authMiddleware, getActiveOrder);
+binanceRoutes.get(
+  "/activeOrder/:id/:coin/:type",
+  authMiddleware,
+  getActiveOrder
+);
 binanceRoutes.get("/all_orders", authMiddleware, getAllOrders);
 binanceRoutes.get("/balance", authMiddleware, getUSDTBalance);
 binanceRoutes.get("/testApi", testApi);
@@ -50,6 +55,8 @@ binanceRoutes.get(
 binanceRoutes.post("/transfer", authMiddleware, universalTransfer);
 binanceRoutes.get("/futurePrices/:id", authMiddleware, futurePrices);
 binanceRoutes.post("/futureMarket", authMiddleware, futureMarketBuySell);
+binanceRoutes.post("/futureLimit", authMiddleware, futureLimitBuySell);
+
 binanceRoutes.get("/positionRisk/:id/:coin", authMiddleware, getPositionRisk);
 binanceRoutes.post("/marketClose", authMiddleware, marketClose);
 binanceRoutes.post("/adjustMargin", authMiddleware, adjustMargin);

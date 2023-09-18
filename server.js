@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import logger, { myLogger } from "#utils/logger";
 import routes from "#routes/index";
 import { envConfig } from "#utils/common/env";
+// import { LeverageHistory } from "#models/leverageHistoryModel";
 import connectDB from "#config/db.config";
 import SocketServer from "#sockets/SocketServer";
 import binanceBtcSockets from "#sockets/binanceBtcLib";
@@ -18,6 +19,9 @@ import { SOCKET_ORIGINS } from "#constants/index";
 envConfig();
 connectDB();
 logger();
+// (async () => {
+//   await LeverageHistory.updateMany({}, { $set: { hasPurchasedCoins: true } });
+// })();
 // deleteProfit();
 const app = express();
 binanceBtcSockets();

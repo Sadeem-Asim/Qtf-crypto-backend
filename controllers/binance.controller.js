@@ -385,7 +385,7 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
       amount,
       reduceOnly,
       coin,
-      type,
+      side,
       tpsl,
       takeProfit,
       balance,
@@ -408,10 +408,10 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
     console.info(await binance.futuresLeverage(coin, leverage));
     console.info(await binance.futuresMarginType(coin, "ISOLATED"));
     console.log("REDUCE ONLY ", reduceOnly);
-    console.log("Type : ", type);
+    console.log("Type : ", side);
     let response = {};
     if (reduceOnly === true) {
-      if (type === "BUY") {
+      if (side === "BUY") {
         response = await binance.futuresMarketSell(coin, quantity, {
           reduceOnly: true,
         });
@@ -421,11 +421,11 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
         });
       }
     } else {
-      if (type === "BUY") {
+      if (side === "BUY") {
         response = await binance.futuresMarketBuy(coin, quantity, {
           newOrderRespType: "RESULT",
         });
-      } else if (type === "SELL") {
+      } else if (side === "SELL") {
         response = await binance.futuresMarketSell(coin, quantity, {
           newOrderRespType: "RESULT",
         });
@@ -473,6 +473,68 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
     res.status(200).send({ status: "Error", message: error.message });
   }
 });
+const futureLimitBuySell = asyncHandlerMiddleware(async (req, res) => {
+  try {
+    let {
+      id,
+      leverage,
+      amount,
+      coin,
+      type,
+      side,
+      tpsl,
+      takeProfit,
+      balance,
+      price,
+    } = req.body;
+    console.log(req.body);
+    const user = await UserModel.findById(id);
+
+    const { apiKey, secret } = extractApiKeys(user?.api);
+    console.log(apiKey, secret);
+    const binance = new Binance().options({
+      APIKEY: apiKey,
+      APISECRET: secret,
+      family: 4,
+    });
+    const futurePrices = await binance.futuresPrices();
+    let futurePrice = futurePrices[coin];
+    // console.log(futurePrice);
+    let quantity = (amount * leverage) / futurePrice;
+    quantity = truncateToDecimals(quantity);
+    console.log(quantity);
+    console.log("Type : ", type);
+    console.log(side);
+
+    let lev = await LeverageHistory.findOne({
+      user: id,
+      coin,
+      active: true,
+      type: "Limit",
+    });
+    if (!lev) {
+      await LeverageHistory.create({
+        user: id,
+        coin,
+        active: true,
+        type: "Limit",
+        hasPurchasedCoins: false,
+        balance: balance,
+        leverage: leverage,
+        side: side,
+        price: price,
+        tpsl: false,
+        amount: Number(amount),
+      });
+      res.status(200).send({ message: "Limit Order Created Successfully" });
+    } else {
+      res.status(200).send({ message: "Limit Order Already In Progress" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(200).send({ status: "Error", message: error.message });
+  }
+});
 
 const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
   try {
@@ -492,7 +554,7 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
     for (let risk of risks) {
       if (risk.symbol === coin) {
         result = risk;
-        console.log(risk);
+        // console.log(risk);
         // result.side = allOrders[allOrders.length - 1]?.side;
         if (Number(result.positionAmt) > 0) {
           result.side = "BUY";
@@ -501,6 +563,28 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
         }
         break;
       }
+    }
+    if (result.side == "BUY") {
+      console.log("HI");
+      await LeverageHistory.findOneAndUpdate(
+        {
+          user: id,
+          coin,
+          active: true,
+        },
+        { buy: result.entryPrice },
+        { new: true }
+      );
+    } else if (result.side == "SELL") {
+      await LeverageHistory.findOneAndUpdate(
+        {
+          user: id,
+          coin,
+          active: true,
+        },
+        { sell: result.entryPrice },
+        { new: true }
+      );
     }
     res.status(200).send({ message: "Done", result });
   } catch (error) {
@@ -626,7 +710,11 @@ const getLeverageStats = asyncHandlerMiddleware(async (req, res) => {
     const { id, coin } = req.params;
     let buy = [],
       sell = [];
-    let leverages = await LeverageHistory.find({ user: id, coin });
+    let leverages = await LeverageHistory.find({
+      user: id,
+      coin,
+      hasPurchasedCoins: true,
+    });
     if (leverages.length === 0) {
       res.status(200).send({ message: "Done", buy, sell });
     } else {
@@ -654,14 +742,26 @@ function truncateToDecimals(num, dec = 3) {
 }
 const getActiveOrder = asyncHandlerMiddleware(async (req, res) => {
   try {
-    const { id, coin } = req.params;
+    const { id, coin, type } = req.params;
     console.log(id);
-    const order = await LeverageHistory.findOne({
-      user: id,
-      active: true,
-      coin: coin,
-    });
-    console.log(order);
+    let order;
+    if (type === "Limit") {
+      order = await LeverageHistory.findOne({
+        user: id,
+        active: true,
+        coin: coin,
+        hasPurchasedCoins: false,
+      });
+    } else if (type === "Market") {
+      order = await LeverageHistory.findOne({
+        user: id,
+        active: true,
+        coin: coin,
+        hasPurchasedCoins: true,
+      });
+    }
+
+    // console.log(order);
     if (!order) {
       res.status(200).send({ message: "No Active Order" });
     } else {
@@ -762,6 +862,7 @@ export {
   universalTransfer,
   futurePrices,
   futureMarketBuySell,
+  futureLimitBuySell,
   getPositionRisk,
   marketClose,
   adjustMargin,

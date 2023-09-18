@@ -5,6 +5,8 @@ import stopBot from "#utils/binance/stopBot";
 import buyOrder from "#utils/binance/buyOrder";
 import fetchRSIValues from "#utils/taapi/fetchRSIValues";
 import leverageMarketClose from "#utils/binance/leverageMarketClose";
+import leverageMarketOpen from "#utils/binance/leverageMarketOpen";
+
 import _ from "lodash";
 import inRange from "#utils/common/inRange";
 import { BotSetting } from "#models/bot_setting.model";
@@ -58,10 +60,44 @@ const leverage = _.debounce(
   async ({ markPrice }) => {
     markPrice = Number(markPrice);
     // console.log("Leverage Mark Price", markPrice);
+    const limitOrders = await LeverageHistory.find({
+      active: true,
+      coin: "BTCUSDT",
+      hasPurchasedCoins: false,
+    });
+    console.log("Total Btc Leverage Limit Open Orders : ", limitOrders.length);
+
+    if (limitOrders.length > 0) {
+      limitOrders.forEach(async (order) => {
+        let buyCondition = false;
+        if (order.side === "BUY") {
+          buyCondition = markPrice >= order.price;
+          // sellCondition = markPrice >= order.takeProfit;
+        } else if (order.side === "SELL") {
+          buyCondition = markPrice <= order.price;
+          // sellCondition = markPrice <= order.takeProfit;
+        }
+        // console.log(sellCondition);
+        if (buyCondition) {
+          // console.log(order);
+          console.log(markPrice);
+          const buyOrderParams = {
+            id: order.user.toString(),
+            coin: "BTCUSDT",
+            orderId: order._id.toString(),
+            markPrice: markPrice,
+          };
+          console.log(buyOrderParams);
+          await leverageMarketOpen(buyOrderParams);
+        }
+      });
+    }
+
     const leverages = await LeverageHistory.find({
       active: true,
       tpsl: true,
       coin: "BTCUSDT",
+      hasPurchasedCoins: true,
     });
     console.log("Total Btc Leverage Open Orders : ", leverages.length);
     if (leverages.length > 0) {
