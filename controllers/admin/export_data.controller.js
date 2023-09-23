@@ -218,7 +218,6 @@ const exportBotData = asyncHandlerMiddleware(async (req, res) => {
       totalPositions += data[i][12];
     }
 
-    console.log(winrate);
     data.push([
       "",
       "",
