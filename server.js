@@ -24,10 +24,10 @@ logger();
 // })();
 // deleteProfit();
 const app = express();
-// binanceBtcSockets();
-// binanceEthSockets();
-// CoinStats();
-// FutureCoinStats();
+binanceBtcSockets();
+binanceEthSockets();
+CoinStats();
+FutureCoinStats();
 const PORT = process.env.PORT || 5000;
 
 /*****  Middlewares  *****/
