@@ -70,7 +70,7 @@ const getProfitLossAccountDetails = asyncHandlerMiddleware(async (req, res) => {
   const _bots = await assignProfit(bots);
 
   //  NOTE::  Winrate Calculation Portion
-  const winrateData = getWinrate(_bots); //NOTE::Winrate
+  const winrateData = getWinrate(_bots, leverages); //NOTE::Winrate
 
   //  NOTE::  Profit Distribution Calculation
   const { profitDistributionData } = getProfitDistribution(bots, currency);
@@ -173,7 +173,7 @@ const getProfitLossAccountDetailsByUser = asyncHandlerMiddleware(
     const _bots = await assignProfit(bots);
 
     //  NOTE::  Winrate Calculation Portion
-    const winrateData = getWinrate(_bots); //NOTE::Winrate
+    const winrateData = getWinrate(_bots, leverages); //NOTE::Winrate
 
     //  NOTE::  Profit Distribution Calculation
     const { profitDistributionData } = getProfitDistribution(bots, currency);
@@ -284,7 +284,7 @@ const userDashboard = asyncHandlerMiddleware(async (req, res) => {
   const { profitDistributionData, assetAllocationData } =
     getProfitDistribution(_bots); // TODO:: May be pass bots
 
-  const winrateData = getWinrate(_bots); //NOTE::Winrate
+  const winrateData = getWinrate(_bots, leverages); //NOTE::Winrate
 
   let totalProfitPrice = _bots.reduce(calculateTotalProfit, 0);
   totalProfitPrice = totalProfitPrice + leverageProfit;
