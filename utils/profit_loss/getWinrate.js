@@ -16,8 +16,8 @@ export default function getWinrate(bots, leverages) {
       Math.abs(round3Precision(loss)),
       round3Precision(break_even),
     ], // Profit _ Loss _ Break-down respectively
-    profit: calculatePercentage(profit, investment),
-    loss: Math.abs(calculatePercentage(loss, investment)),
-    breakEvent: calculatePercentage(break_even, investment),
+    profit: round3Precision(profit),
+    loss: round3Precision(loss),
+    breakEvent: round3Precision(profit + loss),
   };
 }

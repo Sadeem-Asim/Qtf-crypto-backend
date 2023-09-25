@@ -40,7 +40,7 @@ export function calculateProfitDistribution(bots = []) {
 export function calculateWinrate(bots = [], leverages = []) {
   const INITIAL_STATE = { profit: 0, loss: 0, break_even: 0, investment: 0 };
 
-  if (bots.length <= 0) return INITIAL_STATE;
+  // if (bots.length <= 0) return INITIAL_STATE;
 
   const botRes = bots.reduce((obj, { profit, investment }) => {
     if (profit > 0) obj.profit += profit;

@@ -254,6 +254,8 @@ const getAvailableBalance = asyncHandlerMiddleware(async (req, res) => {
       APISECRET: secret,
       family: 4,
     });
+    const trades = await binance.futuresUserTrades("BTCUSDT");
+    console.log(trades);
     if (account === "Main Account") {
       //   console.log("MAIN Account");
       binance.balance((error, balances) => {
@@ -502,13 +504,13 @@ const futureLimitBuySell = asyncHandlerMiddleware(async (req, res) => {
     console.log("Type : ", type);
     console.log(side);
 
-    let lev = await LeverageHistory.findOne({
+    let lev = await LeverageHistory.find({
       user: id,
       coin,
       active: true,
       type: "Limit",
     });
-    if (!lev) {
+    if (lev.length < 2) {
       await LeverageHistory.create({
         user: id,
         coin,
@@ -749,7 +751,7 @@ const getActiveOrder = asyncHandlerMiddleware(async (req, res) => {
     console.log(id);
     let order;
     if (type === "Limit") {
-      order = await LeverageHistory.findOne({
+      order = await LeverageHistory.find({
         user: id,
         active: true,
         coin: coin,
@@ -764,7 +766,7 @@ const getActiveOrder = asyncHandlerMiddleware(async (req, res) => {
       });
     }
 
-    // console.log(order);
+    console.log(order);
     if (!order) {
       res.status(200).send({ message: "No Active Order" });
     } else {
