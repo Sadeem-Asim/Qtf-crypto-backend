@@ -66,8 +66,11 @@ const leverageMarketClose = async ({ id, coin }) => {
           const futureBalance = await binance.futuresBalance();
           for (let i = 0; i < futureBalance.length; i++) {
             if (futureBalance[i].asset === "USDT") {
-              balanceAfterMarketClose = futureBalance[i].balance;
-              console.log("Future Balance : ", futureBalance[i].balance);
+              balanceAfterMarketClose = futureBalance[i].availableBalance;
+              console.log(
+                "Future Balance : ",
+                futureBalance[i].availableBalance
+              );
               break;
             }
           }
@@ -91,8 +94,11 @@ const leverageMarketClose = async ({ id, coin }) => {
           const futureBalance = await binance.futuresBalance();
           for (let i = 0; i < futureBalance.length; i++) {
             if (futureBalance[i].asset === "USDT") {
-              balanceAfterMarketClose = futureBalance[i].balance;
-              console.log("Future Balance : ", futureBalance[i].balance);
+              balanceAfterMarketClose = futureBalance[i].availableBalance;
+              console.log(
+                "Future Balance : ",
+                futureBalance[i].availableBalance
+              );
               break;
             }
           }

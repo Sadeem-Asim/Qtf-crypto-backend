@@ -10,6 +10,7 @@ import { BotSetting } from "#models/bot_setting.model";
 import { DefaultLogger, WebsocketClient } from "binance";
 import { LeverageHistory } from "#models/leverageHistoryModel";
 import leverageMarketClose from "#utils/binance/leverageMarketClose";
+import leverageMarketOpen from "#utils/binance/leverageMarketOpen";
 
 import Binance from "node-binance-api";
 
@@ -298,6 +299,40 @@ const leverage = _.debounce(
   async ({ markPrice }) => {
     markPrice = Number(markPrice);
     // console.log("Leverage Mark Price", markPrice);
+
+    const limitOrders = await LeverageHistory.find({
+      active: true,
+      coin: "ETHUSDT",
+      hasPurchasedCoins: false,
+    });
+    console.log("Total Btc Leverage Limit Open Orders : ", limitOrders.length);
+
+    if (limitOrders.length > 0) {
+      limitOrders.forEach(async (order) => {
+        let buyCondition = false;
+        if (order.side === "BUY") {
+          buyCondition = markPrice >= order.price;
+          // sellCondition = markPrice >= order.takeProfit;
+        } else if (order.side === "SELL") {
+          buyCondition = markPrice <= order.price;
+          // sellCondition = markPrice <= order.takeProfit;
+        }
+        // console.log(sellCondition);
+        if (buyCondition) {
+          // console.log(order);
+          console.log(markPrice);
+          const buyOrderParams = {
+            id: order.user.toString(),
+            coin: "ETHUSDT",
+            orderId: order._id.toString(),
+            markPrice: markPrice,
+          };
+          console.log(buyOrderParams);
+          await leverageMarketOpen(buyOrderParams);
+        }
+      });
+    }
+
     const leverages = await LeverageHistory.find({
       active: true,
       tpsl: true,
