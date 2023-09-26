@@ -71,10 +71,11 @@ const leverage = _.debounce(
       limitOrders.forEach(async (order) => {
         let buyCondition = false;
         if (order.side === "BUY") {
-          buyCondition = markPrice >= order.price;
+          buyCondition = inRange(markPrice, order.price - 3, order.price);
           // sellCondition = markPrice >= order.takeProfit;
         } else if (order.side === "SELL") {
-          buyCondition = markPrice <= order.price;
+          // buyCondition = markPrice <= order.price;
+          buyCondition = inRange(markPrice, order.price + 3, order.price);
           // sellCondition = markPrice <= order.takeProfit;
         }
         // console.log(sellCondition);
