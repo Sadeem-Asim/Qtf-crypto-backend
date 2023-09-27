@@ -391,6 +391,7 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
       tpsl,
       takeProfit,
       balance,
+      type,
     } = req.body;
     const user = await UserModel.findById(id);
 
@@ -465,7 +466,8 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
           0,
           tpsl,
           takeProfit,
-          balance
+          balance,
+          type
         );
       }
     }
@@ -850,7 +852,8 @@ async function createLeverageStats(
   profit = 0,
   tpsl = false,
   takeProfit = 0,
-  balance = 0
+  balance = 0,
+  type = "Market"
 ) {
   const newStat = await LeverageHistory.create({
     user: id,
@@ -862,6 +865,7 @@ async function createLeverageStats(
     tpsl,
     takeProfit,
     balance,
+    type,
   });
   console.log(newStat);
 }

@@ -199,7 +199,7 @@ const getUserBots = asyncHandlerMiddleware(async (req, res) => {
  @access    Private
  */
 const openOrdersUserBots = asyncHandlerMiddleware(async (req, res) => {
-  const filter = { isActive: true };
+  const filter = {};
 
   const user = req?.user?._id;
 
@@ -207,17 +207,25 @@ const openOrdersUserBots = asyncHandlerMiddleware(async (req, res) => {
   console.log(req?.user);
   let leverageProfit = 0;
   if (req?.user?.role === "USER") {
-    filter["role"] = "User";
-    console.log(user);
     let leverages = await LeverageHistory.find({
       user: user,
     });
     leverageProfit = leverages.reduce(calculateTotalProfit, 0);
     console.log("Leverages Profit : ", leverageProfit);
+  } else {
+    filter["isActive"] = true;
   }
-  const openOrders = await Bot.find(filter).populate("setting");
-  const bots = await assignProfit(openOrders);
-  console.log(bots[0]);
+  const allBots = await Bot.find(filter).populate("setting");
+  const openOrders = allBots.filter((bot) => {
+    return bot.role === "User" && bot.isActive === true;
+  });
+  const otherOrders = allBots.filter((bot) => {
+    return bot.role !== "User";
+  });
+
+  const bots = await assignProfit(allBots);
+  // console.log(otherOrders);
+  // console.log(bots[0]);
   if (bots[0].profit === 0 && bots[0].loss === 0) {
     if (leverageProfit > 0) {
       bots[0].profit += leverageProfit;
@@ -229,7 +237,15 @@ const openOrdersUserBots = asyncHandlerMiddleware(async (req, res) => {
   } else if (bots[0].loss !== 0) {
     bots[0].loss += leverageProfit;
   }
-  res.status(200).send(bots);
+
+  if (req?.user?.role === "USER") {
+    otherOrders.forEach((order) => {
+      bots[0].profit += order.profit;
+      bots[0].loss += order.loss;
+    });
+  }
+
+  res.status(200).send(openOrders);
 });
 
 /**

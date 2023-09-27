@@ -18,7 +18,7 @@ const LeverageHistorySchema = new mongoose.Schema(
     balance: { type: Number },
     type: {
       type: String,
-      enum: ["Market", "Limit"],
+      enum: ["Market", "Limit", "Qtf Leverage"],
       default: "Market",
     },
     hasPurchasedCoins: {
@@ -54,6 +54,7 @@ const LeverageHistorySchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+
     active: { type: Boolean, default: true },
   },
   { timestamps: { createdAt: "created_at" } }
