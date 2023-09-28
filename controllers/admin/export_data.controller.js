@@ -82,7 +82,7 @@ const returnUserData = async (user) => {
   endDate = endDate.toDateString();
 
   // for Eth
-  const leveragesETH = await LeverageHistory.find({
+  let leveragesETH = await LeverageHistory.find({
     user: user._id,
     coin: "ETHUSDT",
   });
@@ -93,7 +93,7 @@ const returnUserData = async (user) => {
   let totalProfitETH = botsProfitETH + leverageProfitETH;
 
   // for BTC
-  const leveragesBTC = await LeverageHistory.find({
+  let leveragesBTC = await LeverageHistory.find({
     user: user._id,
     coin: "BTCUSDT",
   });
@@ -116,6 +116,15 @@ const returnUserData = async (user) => {
     botsBTC.concat(botsETH)
   );
   let totalProfit = totalProfitETH + totalProfitBTC;
+
+  const qtfLeverageBtcSpots = leveragesBTC.filter(
+    (lev) => lev.type === "Qtf Leverage"
+  );
+  const qtfLeverageEthSpots = leveragesETH.filter(
+    (lev) => lev.type === "Qtf Leverage"
+  );
+  leveragesBTC = leveragesBTC.filter((lev) => lev.type !== "Qtf Leverage");
+  leveragesETH = leveragesETH.filter((lev) => lev.type !== "Qtf Leverage");
   // console.log(totalProfit);
   return [
     startDate,
@@ -130,7 +139,12 @@ const returnUserData = async (user) => {
     totalPositionsSpot,
     leveragesBTC.length,
     leveragesETH.length,
-    leveragesBTC.length + leveragesETH.length,
+    qtfLeverageBtcSpots.length,
+    qtfLeverageEthSpots.length,
+    leveragesBTC.length +
+      leveragesETH.length +
+      qtfLeverageBtcSpots.length +
+      qtfLeverageEthSpots.length,
   ];
 };
 
@@ -163,6 +177,8 @@ const exportBotData = asyncHandlerMiddleware(async (req, res) => {
         "Positions Spot",
         "BTC Positions Leverage",
         "Eth Positions Leverage",
+        "Qtf Leverage BTC Positions",
+        "Qtf Leverage Eth Positions",
         "Total Positions Leverage",
       ],
     ];
@@ -192,6 +208,8 @@ const exportBotData = asyncHandlerMiddleware(async (req, res) => {
       "Total Positions Spot",
       "Total BTC Positions Leverage",
       "Total ETH Positions Leverage",
+      "Total Qtf Leverage BTC Positions",
+      "Total Qtf Leverage Eth Positions",
       "Total Positions Leverage",
     ]);
     let totalUsers = 0;
@@ -203,6 +221,8 @@ const exportBotData = asyncHandlerMiddleware(async (req, res) => {
     let totalPositionsSpot = 0;
     let totalBtcPositionsLeverage = 0;
     let totalEthPositionsLeverage = 0;
+    let totalBtcPositionsQtfLeverage = 0;
+    let totalEthPositionsQtfLeverage = 0;
     let totalPositions = 0;
     for (let i = 3; i < data.length - 1; i++) {
       console.log(data[i]);
@@ -215,7 +235,9 @@ const exportBotData = asyncHandlerMiddleware(async (req, res) => {
       totalPositionsSpot += data[i][9];
       totalBtcPositionsLeverage += data[i][10];
       totalEthPositionsLeverage += data[i][11];
-      totalPositions += data[i][12];
+      totalBtcPositionsQtfLeverage += data[i][12];
+      totalEthPositionsQtfLeverage += data[i][13];
+      totalPositions += data[i][14];
     }
 
     data.push([
@@ -231,6 +253,8 @@ const exportBotData = asyncHandlerMiddleware(async (req, res) => {
       totalPositionsSpot,
       totalBtcPositionsLeverage,
       totalEthPositionsLeverage,
+      totalBtcPositionsQtfLeverage,
+      totalEthPositionsQtfLeverage,
       totalPositions,
     ]);
 
