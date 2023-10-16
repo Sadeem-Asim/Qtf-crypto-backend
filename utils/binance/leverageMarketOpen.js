@@ -55,6 +55,9 @@ const leverageMarketOpen = async ({ id, coin, orderId, markPrice }) => {
     }
 
     if (response?.status === "FILLED") {
+      const trades = await binance.futuresUserTrades(coin);
+      const trade = trades[trades.length - 1];
+      const profit = Number(trade.realizedPnl) - Number(trade.commission);
       console.log(user.leverage);
       order.amount = parseFloat(order.amount);
       console.log(user.leverage + order.amount);
@@ -72,6 +75,7 @@ const leverageMarketOpen = async ({ id, coin, orderId, markPrice }) => {
         sell = response.avgPrice;
         order.sell = sell;
       }
+      order.profit += profit;
       order.hasPurchasedCoins = true;
       order.save();
     }

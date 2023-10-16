@@ -48,7 +48,7 @@ const botsActivity = asyncHandlerMiddleware(async (req, res) => {
   let filter = {
     role: "User",
   };
-  console.log(req?.user);
+  // console.log(req?.user);
   const { role } = req?.user;
   if (role === "SUB_ADMIN") {
     const subAdmin = await subAdminUsers.findOne({ sub_admin: req?.user?._id });

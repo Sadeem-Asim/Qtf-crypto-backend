@@ -46,7 +46,7 @@ const getProfitLossDashboard = asyncHandlerMiddleware(async (req, res) => {
   const _bots = await assignProfit(bots);
 
   const winrateData = getWinrate(_bots, leverages); //NOTE::Winrate
-  console.log(winrateData);
+  // console.log(winrateData);
   //  NOTE::  Profit Distribution && Asset Allocation Calculation
   const { profitDistributionData, assetAllocationData } =
     getProfitDistribution(_bots); // TODO:: May be pass bots

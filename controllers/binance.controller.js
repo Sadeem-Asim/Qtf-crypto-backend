@@ -255,7 +255,10 @@ const getAvailableBalance = asyncHandlerMiddleware(async (req, res) => {
       family: 4,
     });
     const trades = await binance.futuresUserTrades("BTCUSDT");
-    console.log(trades);
+    const trade = trades[trades.length - 1];
+    const profit = Number(trade.realizedPnl) - Number(trade.commission);
+    console.log(profit);
+    console.log(trade);
     if (account === "Main Account") {
       //   console.log("MAIN Account");
       binance.balance((error, balances) => {
@@ -435,6 +438,11 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
       }
     }
     if (response?.status === "FILLED") {
+      const trades = await binance.futuresUserTrades(coin);
+      const trade = trades[trades.length - 1];
+      const profit = Number(trade.realizedPnl) - Number(trade.commission);
+      console.log(profit);
+
       console.log(user.leverage);
       amount = parseFloat(amount);
       console.log(user.leverage + amount);
@@ -463,12 +471,16 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
           response.side,
           buy,
           sell,
-          0,
+          profit,
           tpsl,
           takeProfit,
           balance,
           type
         );
+      } else {
+        leverage.profit += profit;
+        console.log(leverage);
+        leverage.save();
       }
     }
 
@@ -619,6 +631,9 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
       });
     }
     if (response?.status === "FILLED") {
+      const trades = await binance.futuresUserTrades(coin);
+      const trade = trades[trades.length - 1];
+      const profit = Number(trade.realizedPnl) - Number(trade.commission);
       console.log(user.leverage);
       console.log(response);
       user.leverage = 0;
@@ -634,27 +649,17 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
         });
 
         if (leverage) {
-          let balanceAfterMarketClose = 0;
-          const futureBalance = await binance.futuresBalance();
-          for (let i = 0; i < futureBalance.length; i++) {
-            if (futureBalance[i].asset === "USDT") {
-              balanceAfterMarketClose = futureBalance[i].availableBalance;
-              console.log(
-                "Future Balance : ",
-                futureBalance[i].availableBalance
-              );
-              break;
-            }
-          }
-          let pnl = Number(balanceAfterMarketClose) - leverage.balance;
           leverage.sell = response.avgPrice;
-          leverage.profit = pnl;
+          leverage.profit += profit;
           leverage.active = false;
           leverage.save();
           console.log(leverage);
-          createProfitForLeverage(id, coin, pnl);
+          createProfitForLeverage(id, coin, leverage.profit);
         }
       } else if (type === "SELL") {
+        const trades = await binance.futuresUserTrades(coin);
+        const trade = trades[trades.length - 1];
+        const profit = Number(trade.realizedPnl) - Number(trade.commission);
         const leverage = await LeverageHistory.findOne({
           user: id,
           coin,
@@ -662,25 +667,12 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
           active: true,
         });
         if (leverage) {
-          let balanceAfterMarketClose = 0;
-          const futureBalance = await binance.futuresBalance();
-          for (let i = 0; i < futureBalance.length; i++) {
-            if (futureBalance[i].asset === "USDT") {
-              balanceAfterMarketClose = futureBalance[i].availableBalance;
-              console.log(
-                "Future Balance : ",
-                futureBalance[i].availableBalance
-              );
-              break;
-            }
-          }
-          let pnl = Number(balanceAfterMarketClose) - leverage.balance;
           leverage.buy = response.avgPrice;
-          leverage.profit = pnl;
+          leverage.profit += profit;
           leverage.active = false;
           leverage.save();
           console.log(leverage);
-          createProfitForLeverage(id, coin, pnl);
+          createProfitForLeverage(id, coin, leverage.profit);
         }
       }
     }

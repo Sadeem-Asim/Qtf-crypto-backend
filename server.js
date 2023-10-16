@@ -7,21 +7,21 @@ import cookieParser from "cookie-parser";
 import logger, { myLogger } from "#utils/logger";
 import routes from "#routes/index";
 import { envConfig } from "#utils/common/env";
+import { Profit } from "#models/ProfitModel";
 import { LeverageHistory } from "#models/leverageHistoryModel";
+
 import connectDB from "#config/db.config";
 import SocketServer from "#sockets/SocketServer";
 import binanceBtcSockets from "#sockets/binanceBtcLib";
 import binanceEthSockets from "#sockets/binanceEthLib";
-// import deleteProfit from "./deleteProfits.js";
+import deleteProfit from "./deleteProfits.js";
 import { CoinStats, FutureCoinStats } from "#sockets/CoinStats";
 import { SOCKET_ORIGINS } from "#constants/index";
 
 envConfig();
 connectDB();
 logger();
-// (async () => {
-//   await LeverageHistory.updateMany({}, { $set: { type: "Market" } });
-// })();
+
 // deleteProfit();
 const app = express();
 binanceBtcSockets();
