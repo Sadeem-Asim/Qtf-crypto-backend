@@ -48,6 +48,9 @@ const leverageMarketClose = async ({ id, coin }) => {
       });
     }
     if (response?.status === "FILLED") {
+      const trades = await binance.futuresUserTrades(coin);
+      const trade = trades[trades.length - 1];
+      const profit = Number(trade.realizedPnl) - Number(trade.commission);
       console.log(user.leverage);
       console.log(response);
       user.leverage = 0;
@@ -58,18 +61,13 @@ const leverageMarketClose = async ({ id, coin }) => {
           user: id,
           coin,
           side: type,
-          // buy: entryPrice,
           active: true,
         });
         if (leverage) {
-          const trades = await binance.futuresUserTrades(coin);
-          const trade = trades[trades.length - 1];
-          const profit = Number(trade.realizedPnl) - Number(trade.commission);
-
           leverage.sell = response.avgPrice;
           leverage.profit += profit;
           leverage.active = false;
-          leverage.save();
+          await leverage.save();
           console.log(leverage);
           createProfitForLeverage(id, coin, leverage.profit);
         }
@@ -81,13 +79,10 @@ const leverageMarketClose = async ({ id, coin }) => {
           active: true,
         });
         if (leverage) {
-          const trades = await binance.futuresUserTrades(coin);
-          const trade = trades[trades.length - 1];
-          const profit = Number(trade.realizedPnl) - Number(trade.commission);
           leverage.buy = response.avgPrice;
           leverage.profit += profit;
           leverage.active = false;
-          leverage.save();
+          await leverage.save();
           console.log(leverage);
           createProfitForLeverage(id, coin, leverage.profit);
         }

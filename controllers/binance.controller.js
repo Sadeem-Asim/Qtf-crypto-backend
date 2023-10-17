@@ -254,11 +254,11 @@ const getAvailableBalance = asyncHandlerMiddleware(async (req, res) => {
       APISECRET: secret,
       family: 4,
     });
-    const trades = await binance.futuresUserTrades("BTCUSDT");
+    const trades = await binance.futuresUserTrades("ETHUSDT");
     const trade = trades[trades.length - 1];
     const profit = Number(trade.realizedPnl) - Number(trade.commission);
     console.log(profit);
-    console.log(trade);
+    console.log(trades);
     if (account === "Main Account") {
       //   console.log("MAIN Account");
       binance.balance((error, balances) => {
@@ -480,7 +480,7 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
       } else {
         leverage.profit += profit;
         console.log(leverage);
-        leverage.save();
+        await leverage.save();
       }
     }
 
