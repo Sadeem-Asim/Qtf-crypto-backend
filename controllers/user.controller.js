@@ -91,6 +91,7 @@ const getAllUser = asyncHandlerMiddleware(async (req, res) => {
     users.map(async (user) => {
       // console.log(user);
       const bots = await Bot.find({ user }).populate("setting");
+
       const record = await Bot.findOne(
         {},
         { createdAt: 1 },
@@ -121,7 +122,7 @@ const getAllUser = asyncHandlerMiddleware(async (req, res) => {
       });
 
       let leverageProfit = leverages.reduce(calculateTotalProfit, 0);
-      // console.log("Leverages Profit : ", leverageProfit);
+      console.log("Leverages Profit : ", leverageProfit);
       // console.log(user);
       totalProfit.push(leverageProfit);
       return {
