@@ -834,6 +834,20 @@ const updateProfit = asyncHandlerMiddleware(async (req, res) => {
     res.status(400).send({ status: "Error", message: error.message });
   }
 });
+const deleteHistory = asyncHandlerMiddleware(async (req, res) => {
+  try {
+    const { stats } = req.body;
+    // console.log(stats);
+    stats.forEach(async (stat) => {
+      const order = await LeverageHistory.findByIdAndDelete(stat);
+      await Profit.findOneAndDelete({ value: order.profit, user: order.user });
+    });
+    res.status(200).send({ message: "Done" });
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({ status: "Error", message: error.message });
+  }
+});
 
 async function createLeverageStats(
   id,
@@ -887,4 +901,5 @@ export {
   updateTakeProfit,
   updateProfit,
   deleteOrder,
+  deleteHistory,
 };

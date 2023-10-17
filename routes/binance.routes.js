@@ -24,6 +24,7 @@ import {
   updateProfit,
   futureLimitBuySell,
   deleteOrder,
+  deleteHistory,
 } from "#controllers/binance.controller";
 import authMiddleware from "#middlewares/auth.middleware";
 
@@ -70,5 +71,6 @@ binanceRoutes.get(
 );
 binanceRoutes.put("/takeProfit", authMiddleware, updateTakeProfit);
 binanceRoutes.put("/profit", authMiddleware, updateProfit);
+binanceRoutes.put("/history", authMiddleware, deleteHistory);
 binanceRoutes.post("/convert", authMiddleware, universalConversion);
 export default binanceRoutes;
