@@ -254,11 +254,11 @@ const getAvailableBalance = asyncHandlerMiddleware(async (req, res) => {
       APISECRET: secret,
       family: 4,
     });
-    const trades = await binance.futuresUserTrades("ETHUSDT");
-    const trade = trades[trades.length - 1];
-    const profit = Number(trade.realizedPnl) - Number(trade.commission);
-    console.log(profit);
-    console.log(trades);
+    // const trades = await binance.futuresUserTrades(coin);
+    // const trade = trades[trades.length - 1];
+    // const profit = Number(trade.realizedPnl) - Number(trade.commission);
+    // console.log(profit);
+    // console.log(trades);
     if (account === "Main Account") {
       //   console.log("MAIN Account");
       binance.balance((error, balances) => {

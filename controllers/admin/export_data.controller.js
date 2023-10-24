@@ -78,10 +78,13 @@ const returnUserData = async (user, startDate, endDate) => {
 
   const userBot = await Bot.findOne({ role: "User", user: user._id });
   // console.log(userBot);
-
+  if (!userBot) {
+    return [0, 0, user.name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  }
   if (startDate != user.name) {
     startDate = new Date(startDate);
     endDate = new Date(endDate);
+    endDate.setDate(endDate.getDate() + 1);
   } else {
     startDate = new Date(userBot.createdAt);
     endDate = new Date(Date.now());
@@ -116,7 +119,13 @@ const returnUserData = async (user, startDate, endDate) => {
     created_at: query.createdAt,
   });
   let leverageProfitBTC = leveragesBTC.reduce(calculateTotalProfit, 0);
-  const botsBTC = await Bot.find({ user: user._id, coin: "BTC", ...query });
+  // console.log(query);
+  const botsBTC = await Bot.find({
+    user: user._id,
+    coin: "BTC",
+    createdAt: query.createdAt,
+  });
+  // console.log(botsBTC);
   const _botsBTC = await assignProfit(botsBTC);
   let botsProfitBTC = _botsBTC.reduce(calculateTotalProfit, 0);
   let totalProfitBTC = botsProfitBTC + leverageProfitBTC;
