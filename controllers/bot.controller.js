@@ -29,9 +29,14 @@ const createBot = asyncHandlerMiddleware(async (req, res) => {
   if (!isUserExist) return res.status(404).send("User not found");
 
   const { user, indicator, risk, investment, price, coin, role } = req.body;
-  console.log(role);
+  console.log(role, coin);
   if (role === "User") {
-    let isExistingBot = await Bot.findOne({ user: user, role, isActive: true });
+    let isExistingBot = await Bot.findOne({
+      user: user,
+      role,
+      coin,
+      isActive: true,
+    });
     if (isExistingBot) {
       return res.status(404).send("User Bot Already Active");
     }

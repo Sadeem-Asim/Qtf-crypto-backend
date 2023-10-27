@@ -34,7 +34,7 @@ export default function binanceLib() {
   const wsClient = new WebsocketClient(
     {
       beautify: true,
-      wsUrl: "wss://stream.binance.us:9443",
+      // wsUrl: "wss://ws-api.binance.com:443/ws-api/v3",
       // Disable ping/pong ws heartbeat mechanism (not recommended)
       // disableHeartbeat: true
     },
@@ -48,7 +48,7 @@ export default function binanceLib() {
     const currentPrice = _.round(close);
     const coin = symbol === "BTCUSDT" ? "BTC" : "ETH";
 
-    // console.log({currentPrice, coin,symbol})
+    // console.log({ currentPrice, coin, symbol });
     await cb({ currentPrice, coin, symbol });
   });
 
@@ -86,7 +86,7 @@ const cb = _.debounce(
         },
       },
     ]);
-    console.log("Total Orders Open", bots.length, symbol);
+    console.log("Total ETH Open Orders", bots.length, symbol);
     bots.length > 0
       ? await Promise.all(
           bots.map(async (bot) => {
@@ -357,8 +357,8 @@ const leverage = _.debounce(
             leverage.takeProfit
           );
         }
-        console.log(markPrice);
-        console.log(sellCondition);
+        // console.log(markPrice);
+        // console.log(sellCondition);
         if (sellCondition) {
           // console.log(leverage);
           const sellOrderParams = {
