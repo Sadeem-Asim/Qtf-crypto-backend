@@ -106,6 +106,7 @@ const cb = _.debounce(
 
             const stopCondition = currentPrice <= stop_at;
             const sellCondition = currentPrice >= up;
+            console.log(sellCondition);
             //NOTE:: Automatic Bot Operations block
             if (operation === "AUTO") {
               // NOTE:: INDICATORS[1] = 'TRAILING'

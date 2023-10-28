@@ -263,7 +263,7 @@ const getAvailableBalance = asyncHandlerMiddleware(async (req, res) => {
       //   console.log("MAIN Account");
       binance.balance((error, balances) => {
         if (error) return console.error(error);
-        // console.info("Spot balance: ", balances[coin].available);
+        console.info("Spot balance: ", balances[coin]);
         res.status(200).send({ balance: balances[coin].available });
       });
     } else {
@@ -327,7 +327,7 @@ const universalConversion = asyncHandlerMiddleware(async (req, res) => {
       APISECRET: secret,
       family: 4,
     });
-    console.log(quantity);
+    // console.log(quantity);
     // binance.allOrders("BTCUSDT", (error, orders, symbol) => {
     //   console.info(symbol + " orders:", orders);
     // });
@@ -337,11 +337,12 @@ const universalConversion = asyncHandlerMiddleware(async (req, res) => {
       console.info("bookTickers", ticker.bidPrice);
       console.log(quantity / ticker.bidPrice);
       quantity = quantity / ticker.bidPrice;
-      quantity = _.floor(quantity, 5);
+      quantity = _.floor(quantity, 4);
+      console.log(quantity);
       const result = await binance.marketBuy(`${toCoin}${fromCoin}`, quantity);
       console.log(result);
     } else if (toCoin === "USDT") {
-      quantity = _.floor(quantity, 5);
+      quantity = _.floor(quantity, 4);
       console.log(quantity);
       const result = await binance.marketSell(`${fromCoin}${toCoin}`, quantity);
       console.log(result);
