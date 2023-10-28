@@ -459,13 +459,13 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
       } else if (response.side === "SELL") {
         sell = response.avgPrice;
       }
-      let leverage = await LeverageHistory.findOne({
+      let lev = await LeverageHistory.findOne({
         user: id,
         coin,
         active: true,
         hasPurchasedCoins: true,
       });
-      if (!leverage) {
+      if (!lev) {
         createLeverageStats(
           id,
           coin,
@@ -476,12 +476,14 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
           tpsl,
           takeProfit,
           balance,
-          type
+          type,
+          leverage,
+          amount
         );
       } else {
-        leverage.profit += profit;
-        console.log(leverage);
-        await leverage.save();
+        lev.profit += profit;
+        console.log(lev);
+        await lev.save();
       }
     }
 
@@ -506,15 +508,15 @@ const futureLimitBuySell = asyncHandlerMiddleware(async (req, res) => {
       price,
     } = req.body;
     console.log(req.body);
-    const user = await UserModel.findById(id);
+    // const user = await UserModel.findById(id);
 
-    const { apiKey, secret } = extractApiKeys(user?.api);
-    console.log(apiKey, secret);
-    const binance = new Binance().options({
-      APIKEY: apiKey,
-      APISECRET: secret,
-      family: 4,
-    });
+    // const { apiKey, secret } = extractApiKeys(user?.api);
+    // console.log(apiKey, secret);
+    // const binance = new Binance().options({
+    //   APIKEY: apiKey,
+    //   APISECRET: secret,
+    //   family: 4,
+    // });
 
     console.log("Type : ", type);
     console.log(side);
@@ -860,7 +862,9 @@ async function createLeverageStats(
   tpsl = false,
   takeProfit = 0,
   balance = 0,
-  type = "Market"
+  type = "Market",
+  leverage = 0,
+  amount = 0
 ) {
   const newStat = await LeverageHistory.create({
     user: id,
@@ -873,6 +877,8 @@ async function createLeverageStats(
     takeProfit,
     balance,
     type,
+    leverage,
+    amount,
   });
   console.log(newStat);
 }
