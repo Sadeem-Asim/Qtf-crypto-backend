@@ -294,8 +294,6 @@ async function createLeverageStats(
     buy,
     sell,
     profit,
-    tpsl,
-    takeProfit,
     balance,
     type,
     leverage,
