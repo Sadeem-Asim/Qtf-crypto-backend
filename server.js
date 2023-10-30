@@ -13,6 +13,8 @@ import { LeverageHistory } from "#models/leverageHistoryModel";
 import connectDB from "#config/db.config";
 import SocketServer from "#sockets/SocketServer";
 import binanceBtcSockets from "#sockets/binanceBtcLib";
+import main from "#sockets/main";
+
 import binanceEthSockets from "#sockets/binanceEthLib";
 import deleteProfit from "./deleteProfits.js";
 import { CoinStats, FutureCoinStats } from "#sockets/CoinStats";
@@ -24,6 +26,7 @@ logger();
 
 // deleteProfit();
 const app = express();
+main();
 binanceBtcSockets();
 binanceEthSockets();
 CoinStats();
