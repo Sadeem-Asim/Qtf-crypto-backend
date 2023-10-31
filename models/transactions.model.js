@@ -1,13 +1,14 @@
 /*****  Packages  *****/
-import Joi from 'joi'
+import Joi from "joi";
 import mongoose from "mongoose";
 import JoiObjectId from "joi-objectid";
 
 /*****  Modules  *****/
 
-const mongoose_id = JoiObjectId(Joi)
+const mongoose_id = JoiObjectId(Joi);
 
-const transactionSchema = new mongoose.Schema({
+const transactionSchema = new mongoose.Schema(
+  {
     symbol: String,
     orderId: String,
     clientOrderId: String,
@@ -21,51 +22,53 @@ const transactionSchema = new mongoose.Schema({
     type: String,
     side: String,
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
     bot: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Bot'
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Bot",
     },
     total: {
-        type: Number,
-        default: 0
-    }
-},{timestamps: true});
+      type: Number,
+      default: 0,
+    },
+  },
+  { timestamps: true }
+);
 
-const Transaction = mongoose.model('transaction', transactionSchema);
+const Transaction = mongoose.model("transaction", transactionSchema);
 
 const transactionValidation = (data) => {
-    const schema = Joi.object({
-        qty: Joi.number(),
-        // .required(),
-        type: Joi.string(),
-        // .required(),
-        side: Joi.string(),
-        // .required(),
-        price: Joi.number(),
-        // .required(),
-        status: Joi.string(),
-        // .required(),
-        symbol: Joi.string(),
-        // .required(),
-        tradeId: Joi.number(),
-        // .required(),
-        orderId: Joi.number(),
-        // .required(),
-        timeInForce: Joi.string(),
-        // .required(),
-        transactTime: Joi.number(),
-        // .required(),
-        clientOrderId: Joi.string(),
-        // .required(),
-        user: mongoose_id(),
-        // .required(),
-        bot: mongoose_id().required(),
-    });
+  const schema = Joi.object({
+    qty: Joi.number(),
+    // .required(),
+    type: Joi.string(),
+    // .required(),
+    side: Joi.string(),
+    // .required(),
+    price: Joi.number(),
+    // .required(),
+    status: Joi.string(),
+    // .required(),
+    symbol: Joi.string(),
+    // .required(),
+    tradeId: Joi.number(),
+    // .required(),
+    orderId: Joi.number(),
+    // .required(),
+    timeInForce: Joi.string(),
+    // .required(),
+    transactTime: Joi.number(),
+    // .required(),
+    clientOrderId: Joi.string(),
+    // .required(),
+    user: mongoose_id(),
+    // .required(),
+    bot: mongoose_id().required(),
+  });
 
-    return schema.validate(data);
+  return schema.validate(data);
 };
 
-export {Transaction, transactionValidation as validate}
+export { Transaction, transactionValidation as validate };
