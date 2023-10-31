@@ -64,6 +64,7 @@ const cb = _.debounce(
         active: true,
         hasPurchasedCoins: true,
         created_at: { $gt: startDate },
+        coin: "ETHUSDT",
       });
       console.log(userHistory);
       let clientHistory = await Main.find({
