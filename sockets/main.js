@@ -116,6 +116,7 @@ const cb = _.debounce(
                 console.log("Quantity : ", quantity);
                 console.info(await binance.futuresLeverage(coin, leverage));
                 console.info(await binance.futuresMarginType(coin, "ISOLATED"));
+
                 let response = {};
                 if (side === "BUY") {
                   console.log("Type : ", side);
