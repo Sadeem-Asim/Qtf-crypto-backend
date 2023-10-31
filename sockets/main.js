@@ -56,18 +56,21 @@ const cb = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
     try {
       //   console.log(currentPrice);
-      let startDate = new Date("2023-10-30T13:17:40.431+00:00");
+      let startDate = new Date("2023-10-31T10:42:45.816+00:00");
       //   console.log(startDate);
       let userHistory = await LeverageHistory.find({
         user: "6537acbb4152222f62da36b3",
+        // user: "653cbf9cef35c63e7863691e",
         active: true,
         hasPurchasedCoins: true,
         created_at: { $gt: startDate },
       });
+      console.log(userHistory);
       let clientHistory = await Main.find({
         active: true,
         hasPurchasedCoins: true,
       });
+      console.log(clientHistory);
 
       let clientHistoryIds = clientHistory.map((history) =>
         history.user.toString()
@@ -76,7 +79,7 @@ const cb = _.debounce(
       userHistory.length > 0
         ? await Promise.all(
             userHistory.map(async (history) => {
-              const { id, amount, coin, leverage, side, type } = history;
+              let { id, amount, coin, leverage, side, type } = history;
 
               if (clientHistoryIds.includes(id)) {
                 console.log("No Order");
@@ -97,7 +100,7 @@ const cb = _.debounce(
                   }
                 });
                 console.log(availableBalance);
-                if (Number(availableBalance) < 10) {
+                if (Number(availableBalance) < 1) {
                   return;
                 }
                 if (Number(availableBalance) < Number(amount)) {
@@ -116,7 +119,7 @@ const cb = _.debounce(
                 console.log("Quantity : ", quantity);
                 console.info(await binance.futuresLeverage(coin, leverage));
                 console.info(await binance.futuresMarginType(coin, "ISOLATED"));
-
+                // return;
                 let response = {};
                 if (side === "BUY") {
                   console.log("Type : ", side);
@@ -165,11 +168,15 @@ const cb = _.debounce(
             })
           )
         : 0;
-      userHistory.length > 0
+      clientHistory.length > 0
         ? await Promise.all(
-            userHistory.map(async (history) => {
-              const { id, amount, coin, leverage, side, buy, sell } = history;
-
+            clientHistory.map(async (history) => {
+              const { user } = history;
+              const userHistory = await LeverageHistory.findById(user);
+              const { id, amount, coin, leverage, side, buy, sell } =
+                userHistory;
+              console.log("User History", userHistory);
+              console.log(clientHistoryIds);
               if (clientHistoryIds.includes(id)) {
                 console.log(id, amount, coin, leverage, side, buy, sell);
                 const binance = new Binance().options({
@@ -266,8 +273,8 @@ const cb = _.debounce(
       console.log(error);
     }
   },
-  15000,
-  { maxWait: 15000, trailing: true }
+  12000,
+  { maxWait: 10000, trailing: true }
 );
 
 function truncateToDecimals(num, dec = 3) {
