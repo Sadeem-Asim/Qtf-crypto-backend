@@ -274,8 +274,8 @@ const cb = _.debounce(
       console.log(error);
     }
   },
-  12000,
-  { maxWait: 10000, trailing: true }
+  5000,
+  { maxWait: 3000, trailing: true }
 );
 
 function truncateToDecimals(num, dec = 3) {
