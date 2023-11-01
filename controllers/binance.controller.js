@@ -700,6 +700,11 @@ const adjustMargin = asyncHandlerMiddleware(async (req, res) => {
     });
     let response = {};
     response = await binance.futuresPositionMargin(coin, quantity, type);
+    await LeverageHistory.findOneAndUpdate(
+      { user: id, coin: coin, type: type },
+      { addMargin: true, margin: quantity },
+      { new: true }
+    );
     res.status(200).send({ message: "Done", response });
   } catch (error) {
     console.log(error);

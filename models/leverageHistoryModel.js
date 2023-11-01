@@ -56,6 +56,8 @@ const LeverageHistorySchema = new mongoose.Schema(
     },
 
     active: { type: Boolean, default: true },
+    addMargin: { type: Boolean, default: false },
+    margin: { type: Number, default: 0 },
   },
   { timestamps: { createdAt: "created_at" } }
 );
