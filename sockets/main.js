@@ -61,12 +61,14 @@ const cb = _.debounce(
       let userHistory = await LeverageHistory.find({
         user: "6537acbb4152222f62da36b3",
         // user: "653cbf9cef35c63e7863691e",
+        $or: [{ type: "Market" }, { type: "Qtf Leverage" }],
         active: true,
         hasPurchasedCoins: true,
         created_at: { $gt: startDate },
         coin: "ETHUSDT",
       });
       console.log("Only ETHUSDT");
+      // console.log(userHistory);
       // console.log(userHistory);
       let clientHistory = await Main.find({
         active: true,
@@ -78,6 +80,7 @@ const cb = _.debounce(
         history.user.toString()
       );
       //   console.log(clientHistoryIds);
+      // for buy
       userHistory.length > 0
         ? await Promise.all(
             userHistory.map(async (history) => {
@@ -112,7 +115,7 @@ const cb = _.debounce(
                 }
                 console.log("Amount In Order: ", amountInOrder);
                 // else we are going to buy that history and create the new history
-
+                amountInOrder = amountInOrder / 2;
                 const futurePrices = await binance.futuresPrices();
                 let futurePrice = futurePrices[coin];
                 console.log("Future Price", futurePrice);
@@ -153,6 +156,12 @@ const cb = _.debounce(
                   } else if (response.side === "SELL") {
                     sell = response.avgPrice;
                   }
+                  let active = true;
+
+                  if (clientHistoryIds.includes(id) && type === "Limit") {
+                    active = false;
+                  }
+
                   createLeverageStats(
                     id,
                     coin,
@@ -163,13 +172,15 @@ const cb = _.debounce(
                     availableBalance,
                     type,
                     leverage,
-                    amount
+                    amount,
+                    active
                   );
                 }
               }
             })
           )
         : 0;
+      // for sell
       clientHistory.length > 0
         ? await Promise.all(
             clientHistory.map(async (history) => {
@@ -187,6 +198,7 @@ const cb = _.debounce(
                   family: 4,
                 });
                 let result;
+
                 if (side === "BUY") {
                   if (sell === 0) {
                     console.log("No Order");
@@ -295,7 +307,8 @@ async function createLeverageStats(
   balance = 0,
   type = "Market",
   leverage = 0,
-  amount = 0
+  amount = 0,
+  active = true
 ) {
   const newStat = await Main.create({
     user: id,
@@ -308,6 +321,7 @@ async function createLeverageStats(
     type,
     leverage,
     amount,
+    active,
   });
   console.log(newStat);
 }
