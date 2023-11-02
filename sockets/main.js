@@ -115,6 +115,7 @@ const cb = _.debounce(
                     return element.balance;
                   }
                 });
+                amount = amount * 0.1;
                 console.log(availableBalance);
                 if (Number(availableBalance) < 20) {
                   return;
@@ -124,7 +125,7 @@ const cb = _.debounce(
                 } else {
                   amountInOrder = Number(amount);
                 }
-                amountInOrder = 20;
+
                 console.log("Amount In Order: ", amountInOrder);
                 // else we are going to buy that history and create the new history
                 // amountInOrder = amountInOrder / 2;
@@ -200,7 +201,8 @@ const cb = _.debounce(
                   }
                 });
                 console.log(availableBalance);
-                if (Number(availableBalance) < 20) {
+                amount = amount * 0.1;
+                if (Number(availableBalance) < 10) {
                   return;
                 }
                 if (Number(availableBalance) < Number(amount)) {

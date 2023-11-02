@@ -32,7 +32,7 @@ binanceEthSockets();
 CoinStats();
 FutureCoinStats();
 const PORT = process.env.PORT || 5000;
-
+process.setMaxListeners(0);
 /*****  Middlewares  *****/
 app.use(cors({ origin: true, credentials: true }));
 
