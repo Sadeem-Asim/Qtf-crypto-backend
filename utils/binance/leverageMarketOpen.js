@@ -90,7 +90,7 @@ const leverageMarketOpen = async ({ id, coin, orderId, markPrice }) => {
         ifMarketOrder.profit += profit;
         await order.save();
         await ifMarketOrder.save();
-        if (id === "653cbf9cef35c63e7863691e" && coin === "ETHUSDT") {
+        if (id === "6537acbb4152222f62da36b3" && coin === "ETHUSDT") {
           const buyAgain = await LeverageHistory.create({
             user: order.id,
             amount: order.amount,
@@ -98,6 +98,7 @@ const leverageMarketOpen = async ({ id, coin, orderId, markPrice }) => {
             leverage: order.leverage,
             side: order.side,
             coin: coin,
+            hasPurchasedCoins: false,
           });
           console.log(buyAgain);
         }

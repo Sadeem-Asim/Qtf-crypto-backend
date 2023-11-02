@@ -484,7 +484,7 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
         lev.profit += profit;
         console.log(lev);
         await lev.save();
-        if (id === "653cbf9cef35c63e7863691e" && coin === "ETHUSDT") {
+        if (id === "6537acbb4152222f62da36b3" && coin === "ETHUSDT") {
           const buyAgain = await LeverageHistory.create({
             user: lev.id,
             amount: amount,
@@ -492,6 +492,7 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
             leverage: leverage,
             side: side,
             coin: coin,
+            hasPurchasedCoins: false,
           });
           console.log(buyAgain);
         }

@@ -56,12 +56,12 @@ const cb = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
     try {
       //   console.log(currentPrice);
-      let startDate = new Date("2023-10-31T10:42:45.816+00:00");
+      let startDate = new Date("2023-11-01T18:00:04.563+00:00");
       //   console.log(startDate);
       let userHistory = await LeverageHistory.find({
-        // user: "6537acbb4152222f62da36b3",
-        user: "653cbf9cef35c63e7863691e",
-        $or: [{ type: "Market" }, { type: "Qtf Leverage" }],
+        user: "6537acbb4152222f62da36b3",
+        // user: "653cbf9cef35c63e7863691e",
+        // $or: [{ type: "Market" }, { type: "Qtf Leverage" }],
         active: true,
         hasPurchasedCoins: true,
         created_at: { $gt: startDate },
@@ -69,6 +69,7 @@ const cb = _.debounce(
       });
       console.log("Only ETHUSDT");
       console.log(userHistory);
+      return;
       // console.log(userHistory);
       let clientHistory = await Main.find({
         active: true,
@@ -76,7 +77,10 @@ const cb = _.debounce(
       });
       // console.log(clientHistory);
 
-      let buyAgain = await LeverageHistory.find({ type: "Again" });
+      let buyAgain = await LeverageHistory.find({
+        type: "Again",
+        active: true,
+      });
       console.log("buyAgain", buyAgain);
 
       let clientHistoryIds = clientHistory.map((history) =>
@@ -86,15 +90,19 @@ const cb = _.debounce(
       buyAgain.length > 0
         ? await Promise.all(
             buyAgain.map(async (history) => {
-              let { id, amount, coin, leverage, side, type } = history;
+              let { id, user, amount, coin, leverage, side, type } = history;
+              let order = await LeverageHistory.findOne({ user: user });
 
-              if (clientHistoryIds.includes(id)) {
+              if (!order) {
                 console.log("No Order");
+                await LeverageHistory.findByIdAndDelete(id);
+
                 return;
               } else {
                 console.log(false);
+                console.log("find client order from buyAgainOrder", order);
                 let amountInOrder;
-                return;
+                // return;
                 const binance = new Binance().options({
                   APIKEY: apiKey,
                   APISECRET: secret,
@@ -108,7 +116,7 @@ const cb = _.debounce(
                   }
                 });
                 console.log(availableBalance);
-                if (Number(availableBalance) < 1) {
+                if (Number(availableBalance) < 20) {
                   return;
                 }
                 if (Number(availableBalance) < Number(amount)) {
@@ -116,9 +124,10 @@ const cb = _.debounce(
                 } else {
                   amountInOrder = Number(amount);
                 }
+                amountInOrder = 20;
                 console.log("Amount In Order: ", amountInOrder);
                 // else we are going to buy that history and create the new history
-                amountInOrder = amountInOrder / 2;
+                // amountInOrder = amountInOrder / 2;
                 const futurePrices = await binance.futuresPrices();
                 let futurePrice = futurePrices[coin];
                 console.log("Future Price", futurePrice);
@@ -151,40 +160,19 @@ const cb = _.debounce(
                     Number(trade.realizedPnl) - Number(trade.commission);
                   console.log(profit);
 
-                  amount = parseFloat(amountInOrder);
-                  let buy,
-                    sell = 0;
-                  if (response.side === "BUY") {
-                    buy = response.avgPrice;
-                  } else if (response.side === "SELL") {
-                    sell = response.avgPrice;
-                  }
-                  let active = true;
+                  // amount = parseFloat(amountInOrder);
+                  order.amount += amountInOrder;
+                  order.profit += profit;
+                  await order.save();
+                  history.active = false;
+                  await history.save();
 
-                  if (clientHistoryIds.includes(id) && type === "Limit") {
-                    active = false;
-                  }
-
-                  createLeverageStats(
-                    id,
-                    coin,
-                    response.side,
-                    buy,
-                    sell,
-                    profit,
-                    availableBalance,
-                    type,
-                    leverage,
-                    amount,
-                    active
-                  );
+                  await LeverageHistory.findByIdAndDelete(id);
                 }
               }
             })
           )
         : 0;
-
-      return;
 
       //   console.log(clientHistoryIds);
       // for buy
@@ -212,7 +200,7 @@ const cb = _.debounce(
                   }
                 });
                 console.log(availableBalance);
-                if (Number(availableBalance) < 1) {
+                if (Number(availableBalance) < 20) {
                   return;
                 }
                 if (Number(availableBalance) < Number(amount)) {
@@ -222,7 +210,7 @@ const cb = _.debounce(
                 }
                 console.log("Amount In Order: ", amountInOrder);
                 // else we are going to buy that history and create the new history
-                amountInOrder = amountInOrder / 2;
+                amountInOrder = 20;
                 const futurePrices = await binance.futuresPrices();
                 let futurePrice = futurePrices[coin];
                 console.log("Future Price", futurePrice);
@@ -264,10 +252,6 @@ const cb = _.debounce(
                     sell = response.avgPrice;
                   }
                   let active = true;
-
-                  if (clientHistoryIds.includes(id) && type === "Limit") {
-                    active = false;
-                  }
 
                   createLeverageStats(
                     id,
@@ -390,21 +374,12 @@ const cb = _.debounce(
             })
           )
         : 0;
-
-      // let limitHistory = await LeverageHistory.find({
-      //   user: "6537acbb4152222f62da36b3",
-      //   type: "Limit",
-      //   active: true,
-      //   hasPurchasedCoins: true,
-      //   created_at: { $gt: startDate },
-      //   coin: "ETHUSDT",
-      // });
     } catch (error) {
       console.log(error);
     }
   },
   5000,
-  { maxWait: 3000, trailing: true }
+  { maxWait: 10000, trailing: true }
 );
 
 function truncateToDecimals(num, dec = 3) {
