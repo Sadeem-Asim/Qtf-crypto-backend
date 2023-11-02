@@ -69,7 +69,7 @@ const cb = _.debounce(
       });
       console.log("Only ETHUSDT");
       console.log(userHistory);
-      return;
+      // return;
       // console.log(userHistory);
       let clientHistory = await Main.find({
         active: true,
