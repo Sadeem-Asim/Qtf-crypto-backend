@@ -76,9 +76,116 @@ const cb = _.debounce(
       });
       // console.log(clientHistory);
 
+      let buyAgain = await LeverageHistory.find({ type: "Again" });
+      console.log("buyAgain", buyAgain);
+
       let clientHistoryIds = clientHistory.map((history) =>
         history.user.toString()
       );
+      // buy again or sell again
+      buyAgain.length > 0
+        ? await Promise.all(
+            buyAgain.map(async (history) => {
+              let { id, amount, coin, leverage, side, type } = history;
+
+              if (clientHistoryIds.includes(id)) {
+                console.log("No Order");
+                return;
+              } else {
+                console.log(false);
+                let amountInOrder;
+                return;
+                const binance = new Binance().options({
+                  APIKEY: apiKey,
+                  APISECRET: secret,
+                  family: 4,
+                });
+                const futureBalance = await binance.futuresBalance();
+                const { availableBalance } = futureBalance.find((element) => {
+                  if (element.asset === "USDT") {
+                    console.log("Future Balance : ", element.balance);
+                    return element.balance;
+                  }
+                });
+                console.log(availableBalance);
+                if (Number(availableBalance) < 1) {
+                  return;
+                }
+                if (Number(availableBalance) < Number(amount)) {
+                  amountInOrder = Number(availableBalance);
+                } else {
+                  amountInOrder = Number(amount);
+                }
+                console.log("Amount In Order: ", amountInOrder);
+                // else we are going to buy that history and create the new history
+                amountInOrder = amountInOrder / 2;
+                const futurePrices = await binance.futuresPrices();
+                let futurePrice = futurePrices[coin];
+                console.log("Future Price", futurePrice);
+                let quantity = (amountInOrder * leverage) / futurePrice;
+                quantity = truncateToDecimals(quantity);
+                console.log("Quantity : ", quantity);
+                console.info(await binance.futuresLeverage(coin, leverage));
+                console.info(await binance.futuresMarginType(coin, "ISOLATED"));
+                // return;
+                let response = {};
+                if (side === "BUY") {
+                  console.log("Type : ", side);
+
+                  response = await binance.futuresMarketBuy(coin, quantity, {
+                    newOrderRespType: "RESULT",
+                  });
+                } else if (side === "SELL") {
+                  console.log("Type : ", side);
+
+                  response = await binance.futuresMarketSell(coin, quantity, {
+                    newOrderRespType: "RESULT",
+                  });
+                }
+                console.log("Response : ", response);
+
+                if (response?.status === "FILLED") {
+                  const trades = await binance.futuresUserTrades(coin);
+                  const trade = trades[trades.length - 1];
+                  const profit =
+                    Number(trade.realizedPnl) - Number(trade.commission);
+                  console.log(profit);
+
+                  amount = parseFloat(amountInOrder);
+                  let buy,
+                    sell = 0;
+                  if (response.side === "BUY") {
+                    buy = response.avgPrice;
+                  } else if (response.side === "SELL") {
+                    sell = response.avgPrice;
+                  }
+                  let active = true;
+
+                  if (clientHistoryIds.includes(id) && type === "Limit") {
+                    active = false;
+                  }
+
+                  createLeverageStats(
+                    id,
+                    coin,
+                    response.side,
+                    buy,
+                    sell,
+                    profit,
+                    availableBalance,
+                    type,
+                    leverage,
+                    amount,
+                    active
+                  );
+                }
+              }
+            })
+          )
+        : 0;
+
+      return;
+
       //   console.log(clientHistoryIds);
       // for buy
       userHistory.length > 0
@@ -283,6 +390,7 @@ const cb = _.debounce(
             })
           )
         : 0;
+
       // let limitHistory = await LeverageHistory.find({
       //   user: "6537acbb4152222f62da36b3",
       //   type: "Limit",

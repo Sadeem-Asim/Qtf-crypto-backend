@@ -18,7 +18,7 @@ const LeverageHistorySchema = new mongoose.Schema(
     balance: { type: Number },
     type: {
       type: String,
-      enum: ["Market", "Limit", "Qtf Leverage"],
+      enum: ["Market", "Limit", "Qtf Leverage", "Again"],
       default: "Market",
     },
     hasPurchasedCoins: {

@@ -484,6 +484,17 @@ const futureMarketBuySell = asyncHandlerMiddleware(async (req, res) => {
         lev.profit += profit;
         console.log(lev);
         await lev.save();
+        if (id === "653cbf9cef35c63e7863691e" && coin === "ETHUSDT") {
+          const buyAgain = await LeverageHistory.create({
+            user: lev.id,
+            amount: amount,
+            type: "Again",
+            leverage: leverage,
+            side: side,
+            coin: coin,
+          });
+          console.log(buyAgain);
+        }
       }
     }
 
@@ -633,6 +644,7 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
         newOrderRespType: "RESULT",
       });
     }
+    console.log(response);
     if (response?.status === "FILLED") {
       const trades = await binance.futuresUserTrades(coin);
       const trade = trades[trades.length - 1];

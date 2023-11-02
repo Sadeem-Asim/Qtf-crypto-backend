@@ -55,7 +55,6 @@ const leverageMarketOpen = async ({ id, coin, orderId, markPrice }) => {
     }
 
     if (response?.status === "FILLED") {
-      order.hasPurchasedCoins = true;
       const trades = await binance.futuresUserTrades(coin);
       const trade = trades[trades.length - 1];
       const profit = Number(trade.realizedPnl) - Number(trade.commission);
@@ -76,9 +75,33 @@ const leverageMarketOpen = async ({ id, coin, orderId, markPrice }) => {
         sell = response.avgPrice;
         order.sell = sell;
       }
-      order.profit += profit;
-      order.hasPurchasedCoins = true;
-      await order.save();
+      let ifMarketOrder = await LeverageHistory.findOne({
+        user: id,
+        coin: coin,
+        active: true,
+        hasPurchasedCoins: true,
+      });
+      if (!ifMarketOrder) {
+        order.profit += profit;
+        order.hasPurchasedCoins = true;
+        await order.save();
+      } else {
+        order.active = false;
+        ifMarketOrder.profit += profit;
+        await order.save();
+        await ifMarketOrder.save();
+        if (id === "653cbf9cef35c63e7863691e" && coin === "ETHUSDT") {
+          const buyAgain = await LeverageHistory.create({
+            user: order.id,
+            amount: order.amount,
+            type: "Again",
+            leverage: order.leverage,
+            side: order.side,
+            coin: coin,
+          });
+          console.log(buyAgain);
+        }
+      }
     }
   } catch (error) {
     console.log(error);
