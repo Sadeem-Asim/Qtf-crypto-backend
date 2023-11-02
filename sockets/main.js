@@ -59,8 +59,8 @@ const cb = _.debounce(
       let startDate = new Date("2023-10-31T10:42:45.816+00:00");
       //   console.log(startDate);
       let userHistory = await LeverageHistory.find({
-        user: "6537acbb4152222f62da36b3",
-        // user: "653cbf9cef35c63e7863691e",
+        // user: "6537acbb4152222f62da36b3",
+        user: "653cbf9cef35c63e7863691e",
         $or: [{ type: "Market" }, { type: "Qtf Leverage" }],
         active: true,
         hasPurchasedCoins: true,
@@ -68,7 +68,7 @@ const cb = _.debounce(
         coin: "ETHUSDT",
       });
       console.log("Only ETHUSDT");
-      // console.log(userHistory);
+      console.log(userHistory);
       // console.log(userHistory);
       let clientHistory = await Main.find({
         active: true,
@@ -188,7 +188,7 @@ const cb = _.debounce(
               const userHistory = await LeverageHistory.findById(user);
               const { id, amount, coin, leverage, side, buy, sell } =
                 userHistory;
-              console.log("User History", userHistory);
+              // console.log("User History", userHistory);
               console.log(clientHistoryIds);
               if (clientHistoryIds.includes(id)) {
                 console.log(id, amount, coin, leverage, side, buy, sell);
@@ -283,6 +283,14 @@ const cb = _.debounce(
             })
           )
         : 0;
+      // let limitHistory = await LeverageHistory.find({
+      //   user: "6537acbb4152222f62da36b3",
+      //   type: "Limit",
+      //   active: true,
+      //   hasPurchasedCoins: true,
+      //   created_at: { $gt: startDate },
+      //   coin: "ETHUSDT",
+      // });
     } catch (error) {
       console.log(error);
     }
