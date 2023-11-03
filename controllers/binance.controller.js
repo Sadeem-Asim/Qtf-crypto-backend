@@ -539,7 +539,7 @@ const futureLimitBuySell = asyncHandlerMiddleware(async (req, res) => {
       active: true,
       type: "Limit",
     });
-    if (lev.length < 2) {
+    if (lev.length < 4) {
       await LeverageHistory.create({
         user: id,
         coin,
