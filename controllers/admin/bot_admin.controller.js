@@ -79,7 +79,7 @@ const botsActivity = asyncHandlerMiddleware(async (req, res) => {
         .populate("user")
         .populate(
           "setting",
-          "risk investment operation low up takeProfit indicator isActive time stats"
+          "risk investment operation low up takeProfit indicator isActive time stats hasPurchasedCoins"
         );
       const _bots = await assignProfit(bots);
 

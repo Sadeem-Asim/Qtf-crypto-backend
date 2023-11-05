@@ -42,12 +42,20 @@ const closeSingleOrderBinance = async ({ bot_id, user_id, setting_id }) => {
       quantity: raw?.qty,
     };
 
-    await sellOrder(sellOrderParams, { raw, investment, isManual: true, risk });
-    await BotSetting.findByIdAndUpdate(setting_id, {
-      $set: { hasPurchasedCoins: false, isActive: false, investment: 0 },
+    const result = await sellOrder(sellOrderParams, {
+      raw,
+      investment,
+      isManual: true,
+      risk,
     });
-
-    return true;
+    if (result === true) {
+      await BotSetting.findByIdAndUpdate(setting_id, {
+        $set: { hasPurchasedCoins: false, isActive: false, investment: 0 },
+      });
+      return true;
+    } else {
+      return false;
+    }
   } catch (error) {
     console.log(error);
   }

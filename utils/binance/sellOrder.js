@@ -107,9 +107,21 @@ const sellOrder = async (
       await new Transaction({ ...doc, setting_id }).save();
       await handleBotStatus(bot_id);
       console.log("SOLD");
+      return true;
     })
     // Block Run if Order has been failed with some issue
     .catch(async (error) => {
+      if (error.response.data.code === -2010) {
+        if (symbol === "BTCUSDT") {
+          await BotSetting.findByIdAndUpdate(setting_id, {
+            $inc: { "raw.qty": -0.00001 },
+          });
+        } else if (symbol === "ETHUSDT") {
+          await BotSetting.findByIdAndUpdate(setting_id, {
+            $inc: { "raw.qty": -0.0001 },
+          });
+        }
+      }
       const _error = _.get(error, "response.data.msg", error);
       myLogger.binanceError.error("Sell Order Failed");
       myLogger.binanceError.error(JSON.stringify(error));
@@ -122,6 +134,7 @@ const sellOrder = async (
         user_id,
         setting_id
       );
+      return false;
     });
 };
 

@@ -283,6 +283,25 @@ const closeOrdersUserBots = asyncHandlerMiddleware(async (req, res) => {
  @route     PUT /api/bots/settings/:id
  @access    Private
  */
+const closeOrderBinance = asyncHandlerMiddleware(async (req, res) => {
+  const id = req.params.id;
+  const { botSetting, user_id } = req.body;
+  const { _id: setting_id } = botSetting;
+  console.log(id, botSetting, setting_id, user_id);
+  const result = await closeSingleOrderBinance({
+    bot_id: id,
+    user_id,
+    setting_id,
+  });
+  console.log(result);
+
+  if (result === true) {
+    res.status(200).send({ message: "Sold Successfully" });
+  } else {
+    res.status(200).send({ message: "Couldn't sell" });
+  }
+});
+
 const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
   const id = req.params.id;
   const { bot, botSetting, user_id, hasToCloseOrder } = req.body;
@@ -366,6 +385,7 @@ export {
   openOrdersUserBots,
   closeOrdersUserBots,
   updateBotAndSetting,
+  closeOrderBinance,
 };
 
 /*Util*/

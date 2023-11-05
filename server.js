@@ -26,9 +26,9 @@ logger();
 
 // deleteProfit();
 const app = express();
-main();
-binanceBtcSockets();
-binanceEthSockets();
+// main();
+// binanceBtcSockets();
+// binanceEthSockets();
 CoinStats();
 FutureCoinStats();
 const PORT = process.env.PORT || 5000;

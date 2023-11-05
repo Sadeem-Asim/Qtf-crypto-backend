@@ -9,6 +9,7 @@ import {
   closeOrdersUserBots,
   updateBotAndSetting,
   getBotStats,
+  closeOrderBinance,
 } from "#controllers/bot.controller";
 import authMiddleware from "#middlewares/auth.middleware";
 import validateMongooseIdMiddleware from "#middlewares/validateMongooseId.middleware";
@@ -21,7 +22,7 @@ botRoutes
   .get(authMiddleware, getAllBots);
 
 botRoutes.put("/settings/:id", [authMiddleware], updateBotAndSetting);
-
+botRoutes.post("/settings/close/:id", [authMiddleware], closeOrderBinance);
 botRoutes.get("/user-orders/:id", [authMiddleware], getUserBots);
 botRoutes.get("/open-orders", [authMiddleware], openOrdersUserBots);
 botRoutes.get("/close-orders", [authMiddleware], closeOrdersUserBots);
