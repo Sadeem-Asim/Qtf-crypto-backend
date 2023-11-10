@@ -351,7 +351,6 @@ const cb = _.debounce(
                       side: type,
                       active: true,
                     });
-
                     leverage.sell = response.avgPrice;
                     leverage.profit += profit;
                     leverage.active = false;
