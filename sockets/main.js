@@ -126,7 +126,7 @@ const cb = _.debounce(
                 //   amountInOrder = Number(amount);
                 // }
                 amountInOrder = 10;
-                leverage = 10;
+                leverage = 5;
 
                 console.log("Amount In Order: ", amountInOrder);
                 // else we are going to buy that history and create the new history
@@ -215,7 +215,7 @@ const cb = _.debounce(
                 // console.log("Amount In Order: ", amountInOrder);
                 // else we are going to buy that history and create the new history
                 amountInOrder = 10;
-                leverage = 10;
+                leverage = 5;
                 const futurePrices = await binance.futuresPrices();
                 let futurePrice = futurePrices[coin];
                 console.log("Future Price", futurePrice);
