@@ -115,16 +115,18 @@ const cb = _.debounce(
                     return element.balance;
                   }
                 });
-                amount = amount * 0.1;
-                console.log(availableBalance);
-                if (Number(availableBalance) < 20) {
+                // amount = amount * 0.1;
+                // console.log(availableBalance);
+                if (Number(availableBalance) < 10) {
                   return;
                 }
-                if (Number(availableBalance) < Number(amount)) {
-                  amountInOrder = Number(availableBalance);
-                } else {
-                  amountInOrder = Number(amount);
-                }
+                // if (Number(availableBalance) < Number(amount)) {
+                //   amountInOrder = Number(availableBalance);
+                // } else {
+                //   amountInOrder = Number(amount);
+                // }
+                amountInOrder = 10;
+                leverage = 10;
 
                 console.log("Amount In Order: ", amountInOrder);
                 // else we are going to buy that history and create the new history
@@ -201,18 +203,19 @@ const cb = _.debounce(
                   }
                 });
                 console.log(availableBalance);
-                amount = amount * 0.1;
+                // amount = amount * 0.1;
                 if (Number(availableBalance) < 10) {
                   return;
                 }
-                if (Number(availableBalance) < Number(amount)) {
-                  amountInOrder = Number(availableBalance);
-                } else {
-                  amountInOrder = Number(amount);
-                }
-                console.log("Amount In Order: ", amountInOrder);
+                // if (Number(availableBalance) < Number(amount)) {
+                //   amountInOrder = Number(availableBalance);
+                // } else {
+                //   amountInOrder = Number(amount);
+                // }
+                // console.log("Amount In Order: ", amountInOrder);
                 // else we are going to buy that history and create the new history
-                // amountInOrder = 20;
+                amountInOrder = 10;
+                leverage = 10;
                 const futurePrices = await binance.futuresPrices();
                 let futurePrice = futurePrices[coin];
                 console.log("Future Price", futurePrice);
