@@ -42,7 +42,8 @@ export default function main() {
     const coin = symbol === "BTCUSDT" ? "BTC" : "ETH";
 
     // console.log({currentPrice, coin,symbol})
-    await cb({ currentPrice, coin, symbol });
+    await buyOrder({ currentPrice, coin, symbol });
+    await buyAgain({ currentPrice, coin, symbol });
   });
   // wsClient.subscribeTrades();
   wsClient.subscribeSpotKline("BTCUSDT", "1s");
@@ -52,7 +53,7 @@ const apiKey =
   "EZk6qWCiEC6q1HkCA1Z9lobpPsL5dmETRARR7YQMFknSfcUX8uj0VVunxjDptId7";
 const secret =
   "66LZIQasbzbritL2j45kehDnTLfsEOqNYSlbfrinhTIlB0eLfLY1x0r9ZWKoRFgG";
-const cb = _.debounce(
+const buyOrder = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
     try {
       //   console.log(currentPrice);
@@ -77,105 +78,99 @@ const cb = _.debounce(
       });
       // console.log(clientHistory);
 
-      let buyAgain = await LeverageHistory.find({
-        type: "Again",
-        active: true,
-      });
-      console.log("buyAgain", buyAgain);
-
       let clientHistoryIds = clientHistory.map((history) =>
         history.user.toString()
       );
       // buy again or sell again
-      buyAgain.length > 0
-        ? await Promise.all(
-            buyAgain.map(async (history) => {
-              let { id, user, amount, coin, leverage, side, type } = history;
-              let order = await LeverageHistory.findOne({ user: user });
+      // buyAgain.length > 0
+      //   ? await Promise.all(
+      //       buyAgain.map(async (history) => {
+      //         let { id, user, amount, coin, leverage, side, type } = history;
+      //         let order = await LeverageHistory.findOne({ user: user });
 
-              if (!order) {
-                console.log("No Order");
-                await LeverageHistory.findByIdAndDelete(id);
+      //         if (!order) {
+      //           console.log("No Order");
+      //           await LeverageHistory.findByIdAndDelete(id);
 
-                return;
-              } else {
-                console.log(false);
-                console.log("find client order from buyAgainOrder", order);
-                let amountInOrder;
-                // return;
-                const binance = new Binance().options({
-                  APIKEY: apiKey,
-                  APISECRET: secret,
-                  family: 4,
-                });
-                const futureBalance = await binance.futuresBalance();
-                const { availableBalance } = futureBalance.find((element) => {
-                  if (element.asset === "USDT") {
-                    console.log("Future Balance : ", element.balance);
-                    return element.balance;
-                  }
-                });
-                // amount = amount * 0.1;
-                // console.log(availableBalance);
-                if (Number(availableBalance) < 10) {
-                  return;
-                }
-                // if (Number(availableBalance) < Number(amount)) {
-                //   amountInOrder = Number(availableBalance);
-                // } else {
-                //   amountInOrder = Number(amount);
-                // }
-                amountInOrder = 10;
-                leverage = 5;
+      //           return;
+      //         } else {
+      //           console.log(false);
+      //           console.log("find client order from buyAgainOrder", order);
+      //           let amountInOrder;
+      //           // return;
+      //           const binance = new Binance().options({
+      //             APIKEY: apiKey,
+      //             APISECRET: secret,
+      //             family: 4,
+      //           });
+      //           const futureBalance = await binance.futuresBalance();
+      //           const { availableBalance } = futureBalance.find((element) => {
+      //             if (element.asset === "USDT") {
+      //               console.log("Future Balance : ", element.balance);
+      //               return element.balance;
+      //             }
+      //           });
+      //           // amount = amount * 0.1;
+      //           // console.log(availableBalance);
+      //           if (Number(availableBalance) < 10) {
+      //             return;
+      //           }
+      //           // if (Number(availableBalance) < Number(amount)) {
+      //           //   amountInOrder = Number(availableBalance);
+      //           // } else {
+      //           //   amountInOrder = Number(amount);
+      //           // }
+      //           amountInOrder = 10;
+      //           leverage = 5;
 
-                console.log("Amount In Order: ", amountInOrder);
-                // else we are going to buy that history and create the new history
-                // amountInOrder = amountInOrder / 2;
-                const futurePrices = await binance.futuresPrices();
-                let futurePrice = futurePrices[coin];
-                console.log("Future Price", futurePrice);
-                let quantity = (amountInOrder * leverage) / futurePrice;
-                quantity = truncateToDecimals(quantity);
-                console.log("Quantity : ", quantity);
-                console.info(await binance.futuresLeverage(coin, leverage));
-                console.info(await binance.futuresMarginType(coin, "ISOLATED"));
-                // return;
-                let response = {};
-                if (side === "BUY") {
-                  console.log("Type : ", side);
+      //           console.log("Amount In Order: ", amountInOrder);
+      //           // else we are going to buy that history and create the new history
+      //           // amountInOrder = amountInOrder / 2;
+      //           const futurePrices = await binance.futuresPrices();
+      //           let futurePrice = futurePrices[coin];
+      //           console.log("Future Price", futurePrice);
+      //           let quantity = (amountInOrder * leverage) / futurePrice;
+      //           quantity = truncateToDecimals(quantity);
+      //           console.log("Quantity : ", quantity);
+      //           console.info(await binance.futuresLeverage(coin, leverage));
+      //           console.info(await binance.futuresMarginType(coin, "ISOLATED"));
+      //           // return;
+      //           let response = {};
+      //           if (side === "BUY") {
+      //             console.log("Type : ", side);
 
-                  response = await binance.futuresMarketBuy(coin, quantity, {
-                    newOrderRespType: "RESULT",
-                  });
-                } else if (side === "SELL") {
-                  console.log("Type : ", side);
+      //             response = await binance.futuresMarketBuy(coin, quantity, {
+      //               newOrderRespType: "RESULT",
+      //             });
+      //           } else if (side === "SELL") {
+      //             console.log("Type : ", side);
 
-                  response = await binance.futuresMarketSell(coin, quantity, {
-                    newOrderRespType: "RESULT",
-                  });
-                }
-                console.log("Response : ", response);
+      //             response = await binance.futuresMarketSell(coin, quantity, {
+      //               newOrderRespType: "RESULT",
+      //             });
+      //           }
+      //           console.log("Response : ", response);
 
-                if (response?.status === "FILLED") {
-                  const trades = await binance.futuresUserTrades(coin);
-                  const trade = trades[trades.length - 1];
-                  const profit =
-                    Number(trade.realizedPnl) - Number(trade.commission);
-                  console.log(profit);
+      //           if (response?.status === "FILLED") {
+      //             const trades = await binance.futuresUserTrades(coin);
+      //             const trade = trades[trades.length - 1];
+      //             const profit =
+      //               Number(trade.realizedPnl) - Number(trade.commission);
+      //             console.log(profit);
 
-                  // amount = parseFloat(amountInOrder);
-                  order.amount += amountInOrder;
-                  order.profit += profit;
-                  await order.save();
-                  history.active = false;
-                  await history.save();
+      //             // amount = parseFloat(amountInOrder);
+      //             order.amount += amountInOrder;
+      //             order.profit += profit;
+      //             await order.save();
+      //             history.active = false;
+      //             await history.save();
 
-                  await LeverageHistory.findByIdAndDelete(id);
-                }
-              }
-            })
-          )
-        : 0;
+      //             await LeverageHistory.findByIdAndDelete(id);
+      //           }
+      //         }
+      //       })
+      //     )
+      //   : 0;
 
       //   console.log(clientHistoryIds);
       // for buy
@@ -374,6 +369,111 @@ const cb = _.debounce(
               } else {
                 console.log("No Order");
                 return;
+              }
+            })
+          )
+        : 0;
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  5000,
+  { maxWait: 10000, trailing: true }
+);
+
+const buyAgain = _.debounce(
+  async ({ currentPrice, coin, symbol }) => {
+    try {
+      let buyAgain = await LeverageHistory.find({
+        type: "Again",
+        active: true,
+      });
+      console.log("buyAgain", buyAgain);
+      // buy again or sell again
+      buyAgain.length > 0
+        ? await Promise.all(
+            buyAgain.map(async (history) => {
+              let { id, user, amount, coin, leverage, side, type } = history;
+              let order = await LeverageHistory.findOne({ user: user });
+
+              if (!order) {
+                console.log("No Order");
+                await LeverageHistory.findByIdAndDelete(id);
+
+                return;
+              } else {
+                console.log(false);
+                console.log("find client order from buyAgainOrder", order);
+                let amountInOrder;
+                // return;
+                const binance = new Binance().options({
+                  APIKEY: apiKey,
+                  APISECRET: secret,
+                  family: 4,
+                });
+                const futureBalance = await binance.futuresBalance();
+                const { availableBalance } = futureBalance.find((element) => {
+                  if (element.asset === "USDT") {
+                    console.log("Future Balance : ", element.balance);
+                    return element.balance;
+                  }
+                });
+                // amount = amount * 0.1;
+                // console.log(availableBalance);
+                if (Number(availableBalance) < 10) {
+                  return;
+                }
+                // if (Number(availableBalance) < Number(amount)) {
+                //   amountInOrder = Number(availableBalance);
+                // } else {
+                //   amountInOrder = Number(amount);
+                // }
+                amountInOrder = 10;
+                leverage = 5;
+
+                console.log("Amount In Order: ", amountInOrder);
+                // else we are going to buy that history and create the new history
+                // amountInOrder = amountInOrder / 2;
+                const futurePrices = await binance.futuresPrices();
+                let futurePrice = futurePrices[coin];
+                console.log("Future Price", futurePrice);
+                let quantity = (amountInOrder * leverage) / futurePrice;
+                quantity = truncateToDecimals(quantity);
+                console.log("Quantity : ", quantity);
+                console.info(await binance.futuresLeverage(coin, leverage));
+                console.info(await binance.futuresMarginType(coin, "ISOLATED"));
+                // return;
+                let response = {};
+                if (side === "BUY") {
+                  console.log("Type : ", side);
+
+                  response = await binance.futuresMarketBuy(coin, quantity, {
+                    newOrderRespType: "RESULT",
+                  });
+                } else if (side === "SELL") {
+                  console.log("Type : ", side);
+
+                  response = await binance.futuresMarketSell(coin, quantity, {
+                    newOrderRespType: "RESULT",
+                  });
+                }
+                console.log("Response : ", response);
+
+                if (response?.status === "FILLED") {
+                  await LeverageHistory.findByIdAndDelete(id);
+                  const trades = await binance.futuresUserTrades(coin);
+                  const trade = trades[trades.length - 1];
+                  const profit =
+                    Number(trade.realizedPnl) - Number(trade.commission);
+                  console.log(profit);
+
+                  // amount = parseFloat(amountInOrder);
+                  order.amount += amountInOrder;
+                  order.profit += profit;
+                  await order.save();
+                  history.active = false;
+                  await history.save();
+                }
               }
             })
           )
