@@ -283,24 +283,6 @@ const closeOrdersUserBots = asyncHandlerMiddleware(async (req, res) => {
  @route     PUT /api/bots/settings/:id
  @access    Private
  */
-const closeOrderBinance = asyncHandlerMiddleware(async (req, res) => {
-  const id = req.params.id;
-  const { botSetting, user_id } = req.body;
-  const { _id: setting_id } = botSetting;
-  console.log(id, botSetting, setting_id, user_id);
-  const result = await closeSingleOrderBinance({
-    bot_id: id,
-    user_id,
-    setting_id,
-  });
-  console.log(result);
-
-  if (result === true) {
-    res.status(200).send({ message: "Sold Successfully" });
-  } else {
-    res.status(200).send({ message: "Couldn't sell" });
-  }
-});
 
 const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
   const id = req.params.id;
@@ -316,11 +298,12 @@ const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
       })
     );
   }
+  console.log(botSetting);
 
   const rsi = botSetting["rsi"];
   const manual = botSetting["manual"];
   const trailing = botSetting["trailing"];
-
+  // botSetting;
   const rsiBotId = rsi["_id"];
   const manualBotId = manual["_id"];
   const trailingBotId = trailing["_id"];
@@ -363,7 +346,24 @@ const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
 
   res.send("Setting Successfully updated");
 });
+const closeOrderBinance = asyncHandlerMiddleware(async (req, res) => {
+  const id = req.params.id;
+  const { botSetting, user_id } = req.body;
+  const { _id: setting_id } = botSetting;
+  console.log(id, botSetting, setting_id, user_id);
+  const result = await closeSingleOrderBinance({
+    bot_id: id,
+    user_id,
+    setting_id,
+  });
+  console.log(result);
 
+  if (result === true) {
+    res.status(200).send({ message: "Sold Successfully" });
+  } else {
+    res.status(200).send({ message: "Couldn't sell" });
+  }
+});
 /**
  @desc      Get Bot Stats
  @route     PUT /api/bots/settings/stats/:id
@@ -415,13 +415,22 @@ const updateManualBotSetting = async (id, data) =>
       "up",
       "isActive",
       "takeProfit",
+      "hasPurchasedCoins",
     ]),
     { new: true }
   );
 const updateTrailingBotSetting = async (id, data) =>
   await BotSetting.findByIdAndUpdate(
     id,
-    _.pick(data, ["risk", "investment", "operation", "low", "up", "isActive"]),
+    _.pick(data, [
+      "risk",
+      "investment",
+      "operation",
+      "low",
+      "up",
+      "isActive",
+      "hasPurchasedCoins",
+    ]),
     { new: true }
   );
 const updateRSIBotSetting = async (id, data) =>
@@ -435,6 +444,7 @@ const updateRSIBotSetting = async (id, data) =>
       "up",
       "isActive",
       "time",
+      "hasPurchasedCoins",
     ]),
     { new: true }
   );

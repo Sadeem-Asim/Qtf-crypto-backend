@@ -259,6 +259,7 @@ const getAvailableBalance = asyncHandlerMiddleware(async (req, res) => {
     // const profit = Number(trade.realizedPnl) - Number(trade.commission);
     // console.log(profit);
     // console.log(trades);
+
     if (account === "Main Account") {
       //   console.log("MAIN Account");
       binance.balance((error, balances) => {
@@ -585,33 +586,64 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
         // result.side = allOrders[allOrders.length - 1]?.side;
         if (Number(result.positionAmt) > 0) {
           result.side = "BUY";
-        } else {
+        } else if (Number(result.positionAmt) < 0) {
           result.side = "SELL";
+        } else {
+          result.side = "UNKNOWN";
         }
         break;
       }
     }
     if (result.side == "BUY") {
       console.log("HI");
-      await LeverageHistory.findOneAndUpdate(
+      LeverageHistory.findOneAndUpdate(
+        {
+          user: id,
+          coin,
+          buy: result.entryPrice,
+        },
+        { active: true },
+        { new: true }
+      ).then(() => console.log);
+
+      LeverageHistory.findOneAndUpdate(
         {
           user: id,
           coin,
           active: true,
         },
-        { buy: result.entryPrice },
+        { buy: result.entryPrice, side: result.side },
         { new: true }
-      );
+      ).then(() => console.log);
     } else if (result.side == "SELL") {
-      await LeverageHistory.findOneAndUpdate(
+      LeverageHistory.findOneAndUpdate(
+        {
+          user: id,
+          coin,
+          sell: result.entryPrice,
+        },
+        { active: true },
+        { new: true }
+      ).then(() => console.log);
+      LeverageHistory.findOneAndUpdate(
         {
           user: id,
           coin,
           active: true,
         },
-        { sell: result.entryPrice },
+        { sell: result.entryPrice, side: result.side },
         { new: true }
-      );
+      ).then(() => console.log);
+    } else {
+      LeverageHistory.findOneAndUpdate(
+        {
+          user: id,
+          coin,
+          active: true,
+        },
+        { active: false },
+        { new: true }
+      ).then(() => console.log);
     }
     res.status(200).send({ message: "Done", result });
   } catch (error) {
