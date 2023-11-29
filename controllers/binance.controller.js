@@ -612,7 +612,7 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
           coin,
           active: true,
         },
-        { buy: result.entryPrice, side: result.side },
+        { buy: result.entryPrice, side: result.side, sell: 0 },
         { new: true }
       ).then(() => console.log);
     } else if (result.side == "SELL") {
@@ -631,7 +631,7 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
           coin,
           active: true,
         },
-        { sell: result.entryPrice, side: result.side },
+        { sell: result.entryPrice, side: result.side, buy: 0 },
         { new: true }
       ).then(() => console.log);
     } else {
