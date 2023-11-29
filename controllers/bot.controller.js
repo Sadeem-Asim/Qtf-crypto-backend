@@ -50,7 +50,7 @@ const createBot = asyncHandlerMiddleware(async (req, res) => {
   const manualInvestment = 11; // TODO:: Should be in percentage
   const rsiInvestment = 0; // TODO:: Should be in percentage
   const trailingInvestment = 0; // TODO:: Should be in percentage
-
+  const macdInvestment = 0;
   req["body"]["availableBalance"] = investment - manualInvestment; // for manual order
 
   // NOTE:: 1 Manual Bot Settings Param
@@ -63,7 +63,7 @@ const createBot = asyncHandlerMiddleware(async (req, res) => {
     up: coin === "BTC" ? _.round(price) + 20 : _.round(price) + 6, //// must be selected coin current price + 5
     investment: manualInvestment,
     operation: OPERATION[0],
-    isActive: true,
+    isActive: true, //have to change to true
   }; //Manual
   // NOTE:: 2 AUTO Bot Settings Params
   const settingParams2 = {
@@ -84,7 +84,15 @@ const createBot = asyncHandlerMiddleware(async (req, res) => {
     investment: rsiInvestment,
     operation: OPERATION[1],
     isActive: false,
-  }; // RSI
+  };
+  const settingParams4 = {
+    user,
+    indicator: INDICATORS[2],
+    operation: OPERATION[1],
+    risk,
+    investment: macdInvestment,
+    isActive: false,
+  }; // MACD
 
   const { error: settingError } = validateSetting(settingParams1);
 
@@ -95,6 +103,7 @@ const createBot = asyncHandlerMiddleware(async (req, res) => {
     asyncSaveBotSetting(settingParams1),
     asyncSaveBotSetting(settingParams2),
     asyncSaveBotSetting(settingParams3),
+    asyncSaveBotSetting(settingParams4),
   ]);
 
   req.body.setting = settings;
@@ -303,20 +312,27 @@ const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
   const rsi = botSetting["rsi"];
   const manual = botSetting["manual"];
   const trailing = botSetting["trailing"];
+  const macd = botSetting["macd"];
+
   // botSetting;
   const rsiBotId = rsi["_id"];
   const manualBotId = manual["_id"];
   const trailingBotId = trailing["_id"];
+  const macdBotId = macd["_id"];
 
   const rsiProfit = rsi?.["profit"] || 0;
   const manualProfit = manual?.["profit"] || 0;
   const trailingProfit = trailing?.["profit"] || 0;
+  const macdProfit = macd?.["profit"] || 0;
 
   const isActive =
-    rsi["isActive"] || manual["isActive"] || trailing["isActive"];
+    rsi["isActive"] ||
+    manual["isActive"] ||
+    trailing["isActive"] ||
+    macd["isActive"];
 
   const availableBalance = (() => {
-    let total = rsiProfit + manualProfit + trailingProfit;
+    let total = rsiProfit + manualProfit + trailingProfit + macdProfit;
     if (rsi["isActive"]) {
       total += Number(rsi["investment"]);
     } else {
@@ -333,6 +349,11 @@ const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
     } else {
       trailing["investment"] = 0;
     }
+    if (macd["isActive"]) {
+      total += Number(macd["investment"]);
+    } else {
+      macd["investment"] = 0;
+    }
 
     return Number(bot.investment) - total;
   })();
@@ -342,6 +363,7 @@ const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
     updateRSIBotSetting(rsiBotId, botSetting["rsi"]),
     updateManualBotSetting(manualBotId, botSetting["manual"]),
     updateTrailingBotSetting(trailingBotId, botSetting["trailing"]),
+    updateMacdBotSetting(macdBotId, botSetting["macd"]),
   ]);
 
   res.send("Setting Successfully updated");
@@ -351,16 +373,15 @@ const closeOrderBinance = asyncHandlerMiddleware(async (req, res) => {
   const { botSetting, user_id } = req.body;
   const { _id: setting_id } = botSetting;
   console.log(id, botSetting, setting_id, user_id);
-  const result = await closeSingleOrderBinance({
-    bot_id: id,
-    user_id,
-    setting_id,
-  });
-  console.log(result);
-
-  if (result === true) {
+  try {
+    const result = await closeSingleOrderBinance({
+      bot_id: id,
+      user_id,
+      setting_id,
+    });
+    console.log(result);
     res.status(200).send({ message: "Sold Successfully" });
-  } else {
+  } catch (error) {
     res.status(200).send({ message: "Couldn't sell" });
   }
 });
@@ -371,7 +392,7 @@ const closeOrderBinance = asyncHandlerMiddleware(async (req, res) => {
  */
 const getBotStats = asyncHandlerMiddleware(async (req, res) => {
   const botSetting = await BotSetting.findById(req?.params.id, { stats: 1 });
-
+  // console.log(botSetting);
   res.status(200).send(botSetting);
 });
 
@@ -419,6 +440,22 @@ const updateManualBotSetting = async (id, data) =>
     ]),
     { new: true }
   );
+const updateMacdBotSetting = async (id, data) =>
+  await BotSetting.findByIdAndUpdate(
+    id,
+    _.pick(data, [
+      "risk",
+      "investment",
+      "operation",
+      "low",
+      "up",
+      "isActive",
+      "time",
+      "hasPurchasedCoins",
+    ]),
+    { new: true }
+  );
+
 const updateTrailingBotSetting = async (id, data) =>
   await BotSetting.findByIdAndUpdate(
     id,

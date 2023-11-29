@@ -11,6 +11,7 @@ import { DefaultLogger, WebsocketClient } from "binance";
 import { LeverageHistory } from "#models/leverageHistoryModel";
 import leverageMarketClose from "#utils/binance/leverageMarketClose";
 import leverageMarketOpen from "#utils/binance/leverageMarketOpen";
+import getMACD from "#utils/binance/getMACDvalue";
 
 import Binance from "node-binance-api";
 
@@ -82,6 +83,7 @@ const cb = _.debounce(
             { status: true },
             { coin: coin },
             { exchange: EXCHANGES[0] },
+            { isDeleted: false },
           ],
         },
       },
@@ -106,7 +108,7 @@ const cb = _.debounce(
 
             const stopCondition = currentPrice <= stop_at;
             const sellCondition = currentPrice >= up;
-            console.log(sellCondition);
+            // console.log(sellCondition);
             //NOTE:: Automatic Bot Operations block
             if (operation === "AUTO") {
               // NOTE:: INDICATORS[1] = 'TRAILING'
@@ -226,6 +228,48 @@ const cb = _.debounce(
                     // await stopBot({ setting_id, currentPrice });
                   }
                 }
+              } else if (indicator === INDICATORS[2]) {
+                // MACD BLOCK
+                const signal = await getMACD(symbol, time);
+                if (!signal) return;
+                console.log(
+                  {
+                    i: investment,
+                    t: time,
+                    hasPurchasedCoins: hasPurchasedCoins,
+                    signal: signal,
+                  },
+                  "MACD"
+                );
+                if (hasPurchasedCoins) {
+                  const sellCondition = signal === "SELL";
+                  if (sellCondition) {
+                    const sellOrderParams = {
+                      symbol,
+                      bot_id: _id,
+                      setting_id,
+                      user_id: user,
+                      quantity: raw?.qty,
+                      currentPrice,
+                    };
+                    await sellOrder(sellOrderParams, { raw, investment });
+                  }
+                  console.log(sellCondition);
+                } else {
+                  const buyCondition = signal === "BUY";
+                  console.log(buyCondition);
+                  if (buyCondition) {
+                    const buyOrderParams = {
+                      symbol,
+                      investment,
+                      setting_id,
+                      bot_id: _id,
+                      user_id: user,
+                      currentPrice,
+                    };
+                    await buyOrder(buyOrderParams);
+                  }
+                }
               }
             } // Manual Bot Block
             else {
@@ -294,7 +338,7 @@ const cb = _.debounce(
       : 0;
   },
   3000,
-  { maxWait: 2000, trailing: true }
+  { leading: false, maxWait: 2000, trailing: true }
 );
 const leverage = _.debounce(
   async ({ markPrice }) => {

@@ -13,6 +13,17 @@ import { Profit } from "#models/ProfitModel";
 import { BOT_STATUS, EXCHANGES } from "#constants/index";
 import cache from "#utils/common/Cache";
 
+const decimalCount = (num) => {
+  // Convert to String
+  const numStr = String(num);
+  // String Contains Decimal
+  if (numStr.includes(".")) {
+    return numStr.split(".")[1].length;
+  }
+  // String Does Not Contain Decimal
+  return 0;
+};
+
 const sellOrder = async (
   { symbol, quantity, bot_id, user_id, setting_id, currentPrice },
   { raw, investment, risk = "LOW", isManual = false }
@@ -113,13 +124,26 @@ const sellOrder = async (
     .catch(async (error) => {
       if (error.response.data.code === -2010) {
         if (symbol === "BTCUSDT") {
-          await BotSetting.findByIdAndUpdate(setting_id, {
-            $inc: { "raw.qty": -0.00001 },
-          });
+          let setting = await BotSetting.findById(setting_id);
+          setting.raw.qty = _.round(
+            setting.raw.qty - 0.00001,
+            decimalCount(setting.raw.qty)
+          );
+          await setting.save();
+          // await BotSetting.findByIdAndUpdate(setting_id, {
+          //   $inc: { "raw.qty": -0.00001 },
+          // });
         } else if (symbol === "ETHUSDT") {
-          await BotSetting.findByIdAndUpdate(setting_id, {
-            $inc: { "raw.qty": -0.0001 },
-          });
+          let setting = await BotSetting.findById(setting_id);
+          setting.raw.qty = _.round(
+            setting.raw.qty - 0.0001,
+            decimalCount(setting.raw.qty)
+          );
+          await setting.save();
+
+          // await BotSetting.findByIdAndUpdate(setting_id, {
+          //   $inc: { "raw.qty": -0.0001 },
+          // });
         }
       }
       const _error = _.get(error, "response.data.msg", error);

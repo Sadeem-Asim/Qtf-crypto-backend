@@ -6,7 +6,7 @@ import buyOrder from "#utils/binance/buyOrder";
 import fetchRSIValues from "#utils/taapi/fetchRSIValues";
 import leverageMarketClose from "#utils/binance/leverageMarketClose";
 import leverageMarketOpen from "#utils/binance/leverageMarketOpen";
-
+import getMACD from "#utils/binance/getMACDvalue";
 import _ from "lodash";
 import inRange from "#utils/common/inRange";
 import { BotSetting } from "#models/bot_setting.model";
@@ -45,7 +45,7 @@ export default function binanceLib() {
     // console.log(data);
     const { symbol, kline } = data;
     const { close } = kline;
-    // console.log(symbol);
+    // console.log(data);
     const currentPrice = _.round(close);
     const coin = symbol === "BTCUSDT" ? "BTC" : "ETH";
 
@@ -169,6 +169,7 @@ const cb = _.debounce(
         },
       ]);
       console.log("Total Orders Open", bots.length, symbol);
+      // console.log(bots);
       bots.length > 0
         ? await Promise.all(
             bots.map(async (bot) => {
@@ -185,6 +186,7 @@ const cb = _.debounce(
                 time,
                 raw,
               } = setting;
+              // if (setting_id.toString() !== "6564aa6b4fededeae2b55d89") return;
 
               const stopCondition = currentPrice <= stop_at;
               // console.log(stopCondition, stop_at);
@@ -249,7 +251,6 @@ const cb = _.debounce(
                   }
                 } else if (indicator === INDICATORS[0]) {
                   // NOTE:: INDICATORS[0] = 'RSI' Block
-                  // return;
                   const params = {
                     exchange: EXCHANGES[0], // binance
                     symbol: symbol.replace("USDT", "/USDT"),
@@ -308,6 +309,48 @@ const cb = _.debounce(
                     //NOTE::Stop loss Logic Block
                     else if (stopCondition) {
                       // await stopBot({ setting_id, currentPrice });
+                    }
+                  }
+                } else if (indicator === INDICATORS[2]) {
+                  // MACD BLOCK
+                  const signal = await getMACD(symbol, time);
+                  if (!signal) return;
+                  console.log(
+                    {
+                      i: investment,
+                      t: time,
+                      hasPurchasedCoins: hasPurchasedCoins,
+                      signal: signal,
+                    },
+                    "MACD"
+                  );
+                  if (hasPurchasedCoins) {
+                    const sellCondition = signal === "SELL";
+                    if (sellCondition) {
+                      const sellOrderParams = {
+                        symbol,
+                        bot_id: _id,
+                        setting_id,
+                        user_id: user,
+                        quantity: raw?.qty,
+                        currentPrice,
+                      };
+                      await sellOrder(sellOrderParams, { raw, investment });
+                    }
+                    console.log(sellCondition);
+                  } else {
+                    const buyCondition = signal === "BUY";
+                    console.log(buyCondition);
+                    if (buyCondition) {
+                      const buyOrderParams = {
+                        symbol,
+                        investment,
+                        setting_id,
+                        bot_id: _id,
+                        user_id: user,
+                        currentPrice,
+                      };
+                      await buyOrder(buyOrderParams);
                     }
                   }
                 }
@@ -389,6 +432,6 @@ const cb = _.debounce(
       console.log(error);
     }
   },
-  1200,
-  { maxWait: 2000, trailing: true }
+  2000,
+  { leading: false, maxWait: 2000, trailing: true }
 );
