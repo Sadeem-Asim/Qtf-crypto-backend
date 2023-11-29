@@ -277,7 +277,7 @@ const buyOrder = _.debounce(
             clientHistory.map(async (history) => {
               const { user } = history;
               const userHistory = await LeverageHistory.findById(user);
-              const { id, amount, coin, leverage, side, buy, sell } =
+              const { id, amount, coin, leverage, side, buy, sell, active } =
                 userHistory;
               // console.log("User History", userHistory);
               console.log(clientHistoryIds);
@@ -295,8 +295,16 @@ const buyOrder = _.debounce(
                     console.log("No Order");
                     return;
                   }
+                  if (active === true) {
+                    console.log("No Order");
+                    return;
+                  }
                 } else if (side === "SELL") {
                   if (buy === 0) {
+                    console.log("No Order");
+                    return;
+                  }
+                  if (active === true) {
                     console.log("No Order");
                     return;
                   }
