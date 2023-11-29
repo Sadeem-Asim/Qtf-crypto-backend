@@ -654,7 +654,7 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
 
 const marketClose = asyncHandlerMiddleware(async (req, res) => {
   try {
-    let { id, quantity, coin, type } = req.body;
+    let { id, quantity, coin, type, pnl } = req.body;
     // entryPrice = _.round(entryPrice, 8);
     const user = await UserModel.findById(id);
     // console.log(entryPrice);
@@ -697,7 +697,7 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
         });
 
         if (leverage) {
-          leverage.sell = response.avgPrice;
+          if (pnl) leverage.sell = response.avgPrice;
           leverage.profit += profit;
           leverage.active = false;
           leverage.save();
@@ -715,7 +715,7 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
           active: true,
         });
         if (leverage) {
-          leverage.buy = response.avgPrice;
+          if (pnl) leverage.buy = response.avgPrice;
           leverage.profit += profit;
           leverage.active = false;
           leverage.save();
