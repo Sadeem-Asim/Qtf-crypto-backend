@@ -12,6 +12,7 @@ import { LeverageHistory } from "#models/leverageHistoryModel";
 import leverageMarketClose from "#utils/binance/leverageMarketClose";
 import leverageMarketOpen from "#utils/binance/leverageMarketOpen";
 import getMACD from "#utils/binance/getMACDvalue";
+import moment from "moment";
 
 import Binance from "node-binance-api";
 
