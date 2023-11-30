@@ -123,23 +123,41 @@ const sellOrder = async (
     // Block Run if Order has been failed with some issue
     .catch(async (error) => {
       if (error.response.data.code === -2010) {
+        console.log(error);
+
         if (symbol === "BTCUSDT") {
           let setting = await BotSetting.findById(setting_id);
-          setting.raw.qty = _.round(
-            setting.raw.qty - 0.00001,
-            decimalCount(setting.raw.qty)
-          );
+          setting.raw = {
+            price: setting.raw.price,
+            size: setting.raw.size,
+            qty: _.round(
+              setting.raw.qty - 0.00001,
+              decimalCount(setting.raw.qty)
+            ),
+          };
+          setting.markModified("raw");
           await setting.save();
           // await BotSetting.findByIdAndUpdate(setting_id, {
           //   $inc: { "raw.qty": -0.00001 },
           // });
         } else if (symbol === "ETHUSDT") {
           let setting = await BotSetting.findById(setting_id);
-          setting.raw.qty = _.round(
-            setting.raw.qty - 0.0001,
-            decimalCount(setting.raw.qty)
-          );
+          setting.raw = {
+            price: setting.raw.price,
+            size: setting.raw.size,
+            qty: _.round(
+              setting.raw.qty - 0.0001,
+              decimalCount(setting.raw.qty)
+            ),
+          };
+          setting.markModified("raw");
           await setting.save();
+          // setting.raw.qty = _.round(
+          //   setting.raw.qty - 0.0001,
+          //   decimalCount(setting.raw.qty)
+          // );
+          // console.log(setting);
+          // await setting.save();
 
           // await BotSetting.findByIdAndUpdate(setting_id, {
           //   $inc: { "raw.qty": -0.0001 },

@@ -54,6 +54,6 @@ const runBot = async (symbol = "BTCUSDT", interval = "1m") => {
 
 // Run the bot
 (async () => {
-  const result = await runBot("BTCUSDT", "1m");
+  const result = await runBot("BTCUSDT", "1w");
   console.log(result);
 })();
