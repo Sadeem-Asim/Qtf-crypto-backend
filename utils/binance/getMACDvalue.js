@@ -33,11 +33,11 @@ const checkSignal = (macdValues) => {
   const lastMACD = macdValues[macdValues.length - 1];
   console.log(lastMACD);
   if (lastMACD.MACD > lastMACD.signal) {
-    return "BUY";
+    return { signal: "BUY", macd: lastMACD.histogram };
   } else if (lastMACD.MACD < lastMACD.signal) {
-    return "SELL";
+    return { signal: "SELL", macd: lastMACD.histogram };
   } else {
-    return "No";
+    return { signal: "", macd: "" };
   }
 };
 

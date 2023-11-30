@@ -69,6 +69,10 @@ const botSettingSchema = new mongoose.Schema(
       buy: [Number],
       sell: [Number],
     },
+    macd: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

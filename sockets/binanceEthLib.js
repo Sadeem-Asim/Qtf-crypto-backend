@@ -57,6 +57,20 @@ export default function binanceLib() {
   wsClient.subscribeSpotKline("ETHUSDT", "1s");
 }
 
+const TIME = {
+  "1m": 1,
+  "3m": 3,
+  "5m": 5,
+  "15m": 15,
+  "30m": 30,
+  "1h": 60,
+  "2h": 120,
+  "4h": 240,
+  "6h": 360,
+  "8 hours": 480,
+  "12 hours": 720,
+};
+
 const cb = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
     // console.log("Hi");
@@ -230,7 +244,7 @@ const cb = _.debounce(
                 }
               } else if (indicator === INDICATORS[2]) {
                 // MACD BLOCK
-                const signal = await getMACD(symbol, time);
+                const { signal, macd } = await getMACD(symbol, time);
                 if (!signal) return;
                 console.log(
                   {
@@ -238,11 +252,51 @@ const cb = _.debounce(
                     t: time,
                     hasPurchasedCoins: hasPurchasedCoins,
                     signal: signal,
+                    macd: macd,
                   },
                   "MACD"
                 );
+                if (signal === "SELL") {
+                  await BotSetting.findByIdAndUpdate(
+                    setting_id,
+                    {
+                      macd: true,
+                    },
+                    { new: true }
+                  );
+                }
+
+                // return;
                 if (hasPurchasedCoins) {
-                  const sellCondition = signal === "SELL";
+                  let momentum = false;
+                  console.log(raw?.macd);
+                  console.log(setting.updatedAt);
+                  const currentDateTime = moment();
+                  const specifiedDateTime = moment(setting.updatedAt);
+                  const differenceInMinutes = currentDateTime.diff(
+                    specifiedDateTime,
+                    "minutes"
+                  );
+                  console.log(differenceInMinutes);
+                  if (TIME[time] === differenceInMinutes) {
+                    if (macd < raw.macd) {
+                      console.log("Sell Plz Less Than The Previous Value");
+                      momentum = true;
+                    } else {
+                      console.log("Wait Greater than the previous value");
+                      await BotSetting.findByIdAndUpdate(
+                        setting_id,
+                        {
+                          // hasPurchasedCoins: true,
+                          "raw.macd": macd,
+                        },
+                        { new: true }
+                      );
+                    }
+                  }
+
+                  const sellCondition = signal === "SELL" || momentum;
+                  console.log(sellCondition);
                   if (sellCondition) {
                     const sellOrderParams = {
                       symbol,
@@ -253,11 +307,19 @@ const cb = _.debounce(
                       currentPrice,
                     };
                     await sellOrder(sellOrderParams, { raw, investment });
+                    await BotSetting.findByIdAndUpdate(
+                      setting_id,
+                      {
+                        macd: false,
+                      },
+                      { new: true }
+                    );
                   }
-                  console.log(sellCondition);
                 } else {
-                  const buyCondition = signal === "BUY";
+                  const buyCondition =
+                    signal === "BUY" && setting.macd === true;
                   console.log(buyCondition);
+
                   if (buyCondition) {
                     const buyOrderParams = {
                       symbol,
@@ -268,6 +330,15 @@ const cb = _.debounce(
                       currentPrice,
                     };
                     await buyOrder(buyOrderParams);
+                    await BotSetting.findByIdAndUpdate(
+                      setting_id,
+                      {
+                        hasPurchasedCoins: true,
+                        "raw.macd": macd,
+                        macd: false,
+                      },
+                      { new: true }
+                    );
                   }
                 }
               }

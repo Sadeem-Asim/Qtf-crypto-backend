@@ -13,6 +13,7 @@ import { BotSetting } from "#models/bot_setting.model";
 import { DefaultLogger, WebsocketClient } from "binance";
 import { LeverageHistory } from "#models/leverageHistoryModel";
 import Binance from "node-binance-api";
+import moment from "moment";
 
 export default function binanceLib() {
   const binance = new Binance().options({
@@ -137,6 +138,21 @@ const leverage = _.debounce(
   3000,
   { maxWait: 2000, trailing: true }
 );
+
+const TIME = {
+  "1m": 1,
+  "3m": 3,
+  "5m": 5,
+  "15m": 15,
+  "30m": 30,
+  "1h": 60,
+  "2h": 120,
+  "4h": 240,
+  "6h": 360,
+  "8 hours": 480,
+  "12 hours": 720,
+};
+
 const cb = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
     try {
@@ -311,50 +327,106 @@ const cb = _.debounce(
                       // await stopBot({ setting_id, currentPrice });
                     }
                   }
+                } else if (indicator === INDICATORS[2]) {
+                  // MACD BLOCK
+                  const { signal, macd } = await getMACD(symbol, time);
+                  if (!signal) return;
+                  console.log(
+                    {
+                      i: investment,
+                      t: time,
+                      hasPurchasedCoins: hasPurchasedCoins,
+                      signal: signal,
+                      macd: macd,
+                    },
+                    "MACD"
+                  );
+                  if (signal === "SELL") {
+                    await BotSetting.findByIdAndUpdate(
+                      setting_id,
+                      {
+                        macd: true,
+                      },
+                      { new: true }
+                    );
+                  }
+
+                  // return;
+                  if (hasPurchasedCoins) {
+                    let momentum = false;
+                    console.log(raw?.macd);
+                    console.log(setting.updatedAt);
+                    const currentDateTime = moment();
+                    const specifiedDateTime = moment(setting.updatedAt);
+                    const differenceInMinutes = currentDateTime.diff(
+                      specifiedDateTime,
+                      "minutes"
+                    );
+                    console.log(differenceInMinutes);
+                    if (TIME[time] === differenceInMinutes) {
+                      if (macd < raw.macd) {
+                        console.log("Sell Plz Less Than The Previous Value");
+                        momentum = true;
+                      } else {
+                        console.log("Wait Greater than the previous value");
+                        await BotSetting.findByIdAndUpdate(
+                          setting_id,
+                          {
+                            // hasPurchasedCoins: true,
+                            "raw.macd": macd,
+                          },
+                          { new: true }
+                        );
+                      }
+                    }
+
+                    const sellCondition = signal === "SELL" || momentum;
+                    console.log(sellCondition);
+                    if (sellCondition) {
+                      const sellOrderParams = {
+                        symbol,
+                        bot_id: _id,
+                        setting_id,
+                        user_id: user,
+                        quantity: raw?.qty,
+                        currentPrice,
+                      };
+                      await sellOrder(sellOrderParams, { raw, investment });
+                      await BotSetting.findByIdAndUpdate(
+                        setting_id,
+                        {
+                          macd: false,
+                        },
+                        { new: true }
+                      );
+                    }
+                  } else {
+                    const buyCondition =
+                      signal === "BUY" && setting.macd === true;
+                    console.log(buyCondition);
+
+                    if (buyCondition) {
+                      const buyOrderParams = {
+                        symbol,
+                        investment,
+                        setting_id,
+                        bot_id: _id,
+                        user_id: user,
+                        currentPrice,
+                      };
+                      await buyOrder(buyOrderParams);
+                      await BotSetting.findByIdAndUpdate(
+                        setting_id,
+                        {
+                          hasPurchasedCoins: true,
+                          "raw.macd": macd,
+                          macd: false,
+                        },
+                        { new: true }
+                      );
+                    }
+                  }
                 }
-                //  else if (indicator === INDICATORS[2]) {
-                //   // MACD BLOCK
-                //   const signal = await getMACD(symbol, time);
-                //   if (!signal) return;
-                //   console.log(
-                //     {
-                //       i: investment,
-                //       t: time,
-                //       hasPurchasedCoins: hasPurchasedCoins,
-                //       signal: signal,
-                //     },
-                //     "MACD"
-                //   );
-                //   if (hasPurchasedCoins) {
-                //     const sellCondition = signal === "SELL";
-                //     if (sellCondition) {
-                //       const sellOrderParams = {
-                //         symbol,
-                //         bot_id: _id,
-                //         setting_id,
-                //         user_id: user,
-                //         quantity: raw?.qty,
-                //         currentPrice,
-                //       };
-                //       await sellOrder(sellOrderParams, { raw, investment });
-                //     }
-                //     console.log(sellCondition);
-                //   } else {
-                //     const buyCondition = signal === "BUY";
-                //     console.log(buyCondition);
-                //     if (buyCondition) {
-                //       const buyOrderParams = {
-                //         symbol,
-                //         investment,
-                //         setting_id,
-                //         bot_id: _id,
-                //         user_id: user,
-                //         currentPrice,
-                //       };
-                //       await buyOrder(buyOrderParams);
-                //     }
-                //   }
-                // }
               } // Manual Bot Block
               else {
                 // NOTE:: MANUAL LOGGER
