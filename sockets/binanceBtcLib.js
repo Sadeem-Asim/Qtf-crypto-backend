@@ -311,49 +311,50 @@ const cb = _.debounce(
                       // await stopBot({ setting_id, currentPrice });
                     }
                   }
-                } else if (indicator === INDICATORS[2]) {
-                  // MACD BLOCK
-                  const signal = await getMACD(symbol, time);
-                  if (!signal) return;
-                  console.log(
-                    {
-                      i: investment,
-                      t: time,
-                      hasPurchasedCoins: hasPurchasedCoins,
-                      signal: signal,
-                    },
-                    "MACD"
-                  );
-                  if (hasPurchasedCoins) {
-                    const sellCondition = signal === "SELL";
-                    if (sellCondition) {
-                      const sellOrderParams = {
-                        symbol,
-                        bot_id: _id,
-                        setting_id,
-                        user_id: user,
-                        quantity: raw?.qty,
-                        currentPrice,
-                      };
-                      await sellOrder(sellOrderParams, { raw, investment });
-                    }
-                    console.log(sellCondition);
-                  } else {
-                    const buyCondition = signal === "BUY";
-                    console.log(buyCondition);
-                    if (buyCondition) {
-                      const buyOrderParams = {
-                        symbol,
-                        investment,
-                        setting_id,
-                        bot_id: _id,
-                        user_id: user,
-                        currentPrice,
-                      };
-                      await buyOrder(buyOrderParams);
-                    }
-                  }
                 }
+                //  else if (indicator === INDICATORS[2]) {
+                //   // MACD BLOCK
+                //   const signal = await getMACD(symbol, time);
+                //   if (!signal) return;
+                //   console.log(
+                //     {
+                //       i: investment,
+                //       t: time,
+                //       hasPurchasedCoins: hasPurchasedCoins,
+                //       signal: signal,
+                //     },
+                //     "MACD"
+                //   );
+                //   if (hasPurchasedCoins) {
+                //     const sellCondition = signal === "SELL";
+                //     if (sellCondition) {
+                //       const sellOrderParams = {
+                //         symbol,
+                //         bot_id: _id,
+                //         setting_id,
+                //         user_id: user,
+                //         quantity: raw?.qty,
+                //         currentPrice,
+                //       };
+                //       await sellOrder(sellOrderParams, { raw, investment });
+                //     }
+                //     console.log(sellCondition);
+                //   } else {
+                //     const buyCondition = signal === "BUY";
+                //     console.log(buyCondition);
+                //     if (buyCondition) {
+                //       const buyOrderParams = {
+                //         symbol,
+                //         investment,
+                //         setting_id,
+                //         bot_id: _id,
+                //         user_id: user,
+                //         currentPrice,
+                //       };
+                //       await buyOrder(buyOrderParams);
+                //     }
+                //   }
+                // }
               } // Manual Bot Block
               else {
                 // NOTE:: MANUAL LOGGER

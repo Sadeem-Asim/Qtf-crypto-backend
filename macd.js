@@ -31,6 +31,7 @@ const calculateMACD = (candles) => {
 
 const checkSignal = (macdValues) => {
   const lastMACD = macdValues[macdValues.length - 1];
+
   console.log(lastMACD);
   if (lastMACD.MACD > lastMACD.signal) {
     return "BUY";
@@ -54,6 +55,8 @@ const runBot = async (symbol = "BTCUSDT", interval = "1m") => {
 
 // Run the bot
 (async () => {
-  const result = await runBot("BTCUSDT", "3d");
-  console.log(result);
+  setInterval(async () => {
+    const result = await runBot("BTCUSDT", "5m");
+    console.log(result);
+  }, 1000);
 })();
