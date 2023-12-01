@@ -24,7 +24,7 @@ export default function binanceLib() {
     // console.log(data.markPrice);
     const { markPrice } = data;
     // console.log(markPrice);
-    await leverage({ markPrice });
+    // await leverage({ markPrice });
   });
   const logger = {
     ...DefaultLogger,
@@ -141,7 +141,7 @@ const leverage = _.debounce(
 
 const TIME = {
   "1m": 1,
-  "3m": 3,
+  "3m": 1,
   "5m": 5,
   "15m": 15,
   "30m": 30,
@@ -202,7 +202,7 @@ const cb = _.debounce(
                 time,
                 raw,
               } = setting;
-              // if (setting_id.toString() !== "6564aa6b4fededeae2b55d89") return;
+              if (setting_id.toString() !== "6564aa6b4fededeae2b55d89") return;
 
               const stopCondition = currentPrice <= stop_at;
               // console.log(stopCondition, stop_at);
@@ -341,6 +341,7 @@ const cb = _.debounce(
                     },
                     "MACD"
                   );
+                  return;
                   if (signal === "SELL") {
                     await BotSetting.findByIdAndUpdate(
                       setting_id,
