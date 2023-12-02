@@ -640,6 +640,7 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
           user: id,
           coin,
           active: true,
+          hasPurchasedCoins: true,
         },
         { active: false },
         { new: true }

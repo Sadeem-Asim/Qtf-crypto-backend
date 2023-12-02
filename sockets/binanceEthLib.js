@@ -36,9 +36,6 @@ export default function binanceLib() {
   const wsClient = new WebsocketClient(
     {
       beautify: true,
-      // wsUrl: "wss://ws-api.binance.com:443/ws-api/v3",
-      // Disable ping/pong ws heartbeat mechanism (not recommended)
-      // disableHeartbeat: true
     },
     logger
   );

@@ -32,15 +32,7 @@ export default function binanceLib() {
       // console.log(params)
     },
   };
-  const wsClient = new WebsocketClient(
-    {
-      beautify: true,
-      // wsUrl: "wss://ws-api.binance.com:443/ws-api/v3",
-      // Disable ping/pong ws heartbeat mechanism (not recommended)
-      // disableHeartbeat: true
-    },
-    logger
-  );
+  const wsClient = new WebsocketClient({ beautify: true }, logger);
 
   wsClient.on("formattedMessage", async (data) => {
     // console.log(data);
@@ -141,16 +133,16 @@ const leverage = _.debounce(
 
 const TIME = {
   "1m": 1,
-  "3m": 1,
-  "5m": 5,
-  "15m": 15,
-  "30m": 30,
-  "1h": 60,
-  "2h": 120,
-  "4h": 240,
-  "6h": 360,
-  "8 hours": 480,
-  "12 hours": 720,
+  "3m": 3,
+  "5m": 2,
+  "15m": 5,
+  "30m": 10,
+  "1h": 15,
+  "2h": 15,
+  "4h": 15,
+  "6h": 15,
+  "8 hours": 15,
+  "12 hours": 15,
 };
 
 const cb = _.debounce(
@@ -341,7 +333,7 @@ const cb = _.debounce(
                     },
                     "MACD"
                   );
-                  return;
+                  // return;
                   if (signal === "SELL") {
                     await BotSetting.findByIdAndUpdate(
                       setting_id,
@@ -354,8 +346,38 @@ const cb = _.debounce(
 
                   // return;
                   if (hasPurchasedCoins) {
+                    let takeProfitCondition = false;
+                    console.log(takeProfit);
+                    if (takeProfit !== 0) {
+                      if (currentPrice < takeProfit) {
+                        takeProfitCondition = true;
+                      }
+                      if (
+                        currentPrice > takeProfit + 10 &&
+                        takeProfit < raw.price + 30
+                      ) {
+                        await BotSetting.findByIdAndUpdate(
+                          setting_id,
+                          {
+                            takeProfit: currentPrice - 3,
+                          },
+                          { new: true }
+                        );
+                      }
+                    } else {
+                      if (currentPrice > raw.price + 5) {
+                        await BotSetting.findByIdAndUpdate(
+                          setting_id,
+                          {
+                            takeProfit: currentPrice,
+                          },
+                          { new: true }
+                        );
+                      }
+                    }
+
                     let momentum = false;
-                    console.log(raw?.macd);
+                    console.log("RAW.MACD", raw?.macd);
                     console.log(setting.updatedAt);
                     const currentDateTime = moment();
                     const specifiedDateTime = moment(setting.updatedAt);
@@ -381,8 +403,15 @@ const cb = _.debounce(
                       }
                     }
 
-                    const sellCondition = signal === "SELL" || momentum;
+                    // let sellCondition = false;
+                    console.log("Take Profit Condition", takeProfitCondition);
+                    console.log("Momentum", momentum);
+                    let sellCondition = signal === "SELL" || momentum;
+                    if (takeProfitCondition) {
+                      sellCondition = true;
+                    }
                     console.log(sellCondition);
+                    // return;
                     if (sellCondition) {
                       const sellOrderParams = {
                         symbol,
@@ -397,6 +426,7 @@ const cb = _.debounce(
                         setting_id,
                         {
                           macd: false,
+                          takeProfit: 0,
                         },
                         { new: true }
                       );
@@ -405,7 +435,7 @@ const cb = _.debounce(
                     const buyCondition =
                       signal === "BUY" && setting.macd === true;
                     console.log(buyCondition);
-
+                    // return;
                     if (buyCondition) {
                       const buyOrderParams = {
                         symbol,
