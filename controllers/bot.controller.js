@@ -391,7 +391,21 @@ const closeOrderBinance = asyncHandlerMiddleware(async (req, res) => {
  @access    Private
  */
 const getBotStats = asyncHandlerMiddleware(async (req, res) => {
-  const botSetting = await BotSetting.findById(req?.params.id, { stats: 1 });
+  const botSetting = await BotSetting.findById(req?.params.id, {
+    stats: 1,
+    takeProfit: 1,
+  });
+  // console.log(botSetting);
+  res.status(200).send(botSetting);
+});
+const deleteBotStats = asyncHandlerMiddleware(async (req, res) => {
+  const botSetting = await BotSetting.findByIdAndUpdate(
+    req?.body.settingId,
+    {
+      stats: { buy: [], sell: [] },
+    },
+    { new: true }
+  );
   // console.log(botSetting);
   res.status(200).send(botSetting);
 });
@@ -407,6 +421,7 @@ export {
   closeOrdersUserBots,
   updateBotAndSetting,
   closeOrderBinance,
+  deleteBotStats,
 };
 
 /*Util*/
@@ -452,6 +467,7 @@ const updateMacdBotSetting = async (id, data) =>
       "isActive",
       "time",
       "hasPurchasedCoins",
+      "takeProfit",
     ]),
     { new: true }
   );

@@ -254,6 +254,7 @@ const cb = _.debounce(
                   },
                   "MACD"
                 );
+                // return;
                 if (signal === "SELL") {
                   await BotSetting.findByIdAndUpdate(
                     setting_id,
@@ -266,35 +267,69 @@ const cb = _.debounce(
 
                 // return;
                 if (hasPurchasedCoins) {
-                  let momentum = false;
-                  console.log(raw?.macd);
-                  console.log(setting.updatedAt);
-                  const currentDateTime = moment();
-                  const specifiedDateTime = moment(setting.updatedAt);
-                  const differenceInMinutes = currentDateTime.diff(
-                    specifiedDateTime,
-                    "minutes"
-                  );
-                  console.log(differenceInMinutes);
-                  if (TIME[time] === differenceInMinutes) {
-                    if (macd < raw.macd) {
-                      console.log("Sell Plz Less Than The Previous Value");
-                      momentum = true;
-                    } else {
-                      console.log("Wait Greater than the previous value");
+                  let takeProfitCondition = false;
+                  console.log(takeProfit);
+                  if (takeProfit !== 0) {
+                    if (currentPrice < takeProfit) {
+                      takeProfitCondition = true;
+                    }
+                    if (currentPrice > takeProfit + 5) {
                       await BotSetting.findByIdAndUpdate(
                         setting_id,
                         {
-                          // hasPurchasedCoins: true,
-                          "raw.macd": macd,
+                          takeProfit: currentPrice - 1,
+                        },
+                        { new: true }
+                      );
+                    }
+                  } else {
+                    if (currentPrice > raw.price + 3) {
+                      await BotSetting.findByIdAndUpdate(
+                        setting_id,
+                        {
+                          takeProfit: currentPrice,
                         },
                         { new: true }
                       );
                     }
                   }
 
-                  const sellCondition = signal === "SELL" || momentum;
+                  // let momentum = false;
+                  // console.log("RAW.MACD", raw?.macd);
+                  // console.log(setting.updatedAt);
+                  // const currentDateTime = moment();
+                  // const specifiedDateTime = moment(setting.updatedAt);
+                  // const differenceInMinutes = currentDateTime.diff(
+                  //   specifiedDateTime,
+                  //   "minutes"
+                  // );
+                  // console.log(differenceInMinutes);
+                  // if (TIME[time] === differenceInMinutes) {
+                  //   if (macd < raw.macd) {
+                  //     console.log("Sell Plz Less Than The Previous Value");
+                  //     momentum = true;
+                  //   } else {
+                  //     console.log("Wait Greater than the previous value");
+                  //     await BotSetting.findByIdAndUpdate(
+                  //       setting_id,
+                  //       {
+                  //         // hasPurchasedCoins: true,
+                  //         "raw.macd": macd,
+                  //       },
+                  //       { new: true }
+                  //     );
+                  //   }
+                  // }
+
+                  // let sellCondition = false;
+                  console.log("Take Profit Condition", takeProfitCondition);
+                  // console.log("Momentum", momentum);
+                  let sellCondition = signal === "SELL" || takeProfitCondition;
+                  // if (takeProfitCondition) {
+                  //   sellCondition = true;
+                  // }
                   console.log(sellCondition);
+                  // return;
                   if (sellCondition) {
                     const sellOrderParams = {
                       symbol,
@@ -309,6 +344,7 @@ const cb = _.debounce(
                       setting_id,
                       {
                         macd: false,
+                        takeProfit: 0,
                       },
                       { new: true }
                     );
@@ -317,7 +353,7 @@ const cb = _.debounce(
                   const buyCondition =
                     signal === "BUY" && setting.macd === true;
                   console.log(buyCondition);
-
+                  // return;
                   if (buyCondition) {
                     const buyOrderParams = {
                       symbol,

@@ -352,10 +352,7 @@ const cb = _.debounce(
                       if (currentPrice < takeProfit) {
                         takeProfitCondition = true;
                       }
-                      if (
-                        currentPrice > takeProfit + 10 &&
-                        takeProfit < raw.price + 30
-                      ) {
+                      if (currentPrice > takeProfit + 10) {
                         await BotSetting.findByIdAndUpdate(
                           setting_id,
                           {
@@ -376,40 +373,41 @@ const cb = _.debounce(
                       }
                     }
 
-                    let momentum = false;
-                    console.log("RAW.MACD", raw?.macd);
-                    console.log(setting.updatedAt);
-                    const currentDateTime = moment();
-                    const specifiedDateTime = moment(setting.updatedAt);
-                    const differenceInMinutes = currentDateTime.diff(
-                      specifiedDateTime,
-                      "minutes"
-                    );
-                    console.log(differenceInMinutes);
-                    if (TIME[time] === differenceInMinutes) {
-                      if (macd < raw.macd) {
-                        console.log("Sell Plz Less Than The Previous Value");
-                        momentum = true;
-                      } else {
-                        console.log("Wait Greater than the previous value");
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            // hasPurchasedCoins: true,
-                            "raw.macd": macd,
-                          },
-                          { new: true }
-                        );
-                      }
-                    }
+                    // let momentum = false;
+                    // console.log("RAW.MACD", raw?.macd);
+                    // console.log(setting.updatedAt);
+                    // const currentDateTime = moment();
+                    // const specifiedDateTime = moment(setting.updatedAt);
+                    // const differenceInMinutes = currentDateTime.diff(
+                    //   specifiedDateTime,
+                    //   "minutes"
+                    // );
+                    // console.log(differenceInMinutes);
+                    // if (TIME[time] === differenceInMinutes) {
+                    //   if (macd < raw.macd) {
+                    //     console.log("Sell Plz Less Than The Previous Value");
+                    //     momentum = true;
+                    //   } else {
+                    //     console.log("Wait Greater than the previous value");
+                    //     await BotSetting.findByIdAndUpdate(
+                    //       setting_id,
+                    //       {
+                    //         // hasPurchasedCoins: true,
+                    //         "raw.macd": macd,
+                    //       },
+                    //       { new: true }
+                    //     );
+                    //   }
+                    // }
 
                     // let sellCondition = false;
                     console.log("Take Profit Condition", takeProfitCondition);
-                    console.log("Momentum", momentum);
-                    let sellCondition = signal === "SELL" || momentum;
-                    if (takeProfitCondition) {
-                      sellCondition = true;
-                    }
+                    // console.log("Momentum", momentum);
+                    let sellCondition =
+                      signal === "SELL" || takeProfitCondition;
+                    // if (takeProfitCondition) {
+                    //   sellCondition = true;
+                    // }
                     console.log(sellCondition);
                     // return;
                     if (sellCondition) {

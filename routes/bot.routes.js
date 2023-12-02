@@ -10,6 +10,7 @@ import {
   updateBotAndSetting,
   getBotStats,
   closeOrderBinance,
+  deleteBotStats,
 } from "#controllers/bot.controller";
 import authMiddleware from "#middlewares/auth.middleware";
 import validateMongooseIdMiddleware from "#middlewares/validateMongooseId.middleware";
@@ -33,6 +34,7 @@ botRoutes.get(
   [validateMongooseIdMiddleware, authMiddleware],
   getBotStats
 );
+botRoutes.put("/settings/delete/stats", [authMiddleware], deleteBotStats);
 
 botRoutes
   .route("/:id")
