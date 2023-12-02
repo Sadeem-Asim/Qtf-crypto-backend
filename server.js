@@ -27,7 +27,7 @@ logger();
 // deleteProfit();
 const app = express();
 main();
-// binanceBtcSockets();
+binanceBtcSockets();
 // binanceEthSockets();
 CoinStats();
 FutureCoinStats();
