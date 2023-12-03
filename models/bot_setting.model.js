@@ -73,6 +73,8 @@ const botSettingSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    macdUpdatedAt: { type: Date, default: Date.now },
+    macdValue: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
