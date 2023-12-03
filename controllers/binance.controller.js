@@ -588,7 +588,7 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
           result.side = "BUY";
         } else if (Number(result.positionAmt) < 0) {
           result.side = "SELL";
-        } else {
+        } else if (Number(result.positionAmt) == 0) {
           result.side = "UNKNOWN";
         }
         break;
