@@ -24,7 +24,7 @@ export default function binanceLib() {
     // console.log(data.markPrice);
     const { markPrice } = data;
     // console.log(markPrice);
-    await leverage({ markPrice });
+    // await leverage({ markPrice });
   });
   const logger = {
     ...DefaultLogger,
@@ -193,8 +193,10 @@ const cb = _.debounce(
                 indicator,
                 time,
                 raw,
+                macdValue,
+                macdUpdatedAt,
               } = setting;
-              if (setting_id.toString() === "6564aa6b4fededeae2b55d89") return;
+              // if (setting_id.toString() !== "6564aa6b4fededeae2b55d89") return;
 
               const stopCondition = currentPrice <= stop_at;
               // console.log(stopCondition, stop_at);
@@ -333,44 +335,66 @@ const cb = _.debounce(
                     },
                     "MACD"
                   );
+                  console.log(macdValue, macdUpdatedAt);
+                  // if (signal === "BUY") {
+                  //   if (macd < macdValue) {
+                  //     await BotSetting.findByIdAndUpdate(
+                  //       setting_id,
+                  //       {
+                  //         macd: false,
+                  //       },
+                  //       { new: true }
+                  //     );
+                  //   } else {
+                  //     await BotSetting.findByIdAndUpdate(
+                  //       setting_id,
+                  //       {
+                  //         macd: true,
+                  //       },
+                  //       { new: true }
+                  //     );
+                  //   }
+                  //   let momentum = false;
+                  //   console.log("RAW.MACD", macdValue);
+                  //   const currentDateTime = moment();
+                  //   const specifiedDateTime = moment(macdUpdatedAt);
+                  //   const differenceInMinutes = currentDateTime.diff(
+                  //     specifiedDateTime,
+                  //     "minutes"
+                  //   );
+                  //   console.log(differenceInMinutes);
 
-                  if (signal === "BUY") {
-                    let momentum = false;
-                    console.log("RAW.MACD", raw?.macd);
-                    console.log(setting.updatedAt);
-                    const currentDateTime = moment();
-                    const specifiedDateTime = moment(setting.updatedAt);
-                    const differenceInMinutes = currentDateTime.diff(
-                      specifiedDateTime,
-                      "minutes"
-                    );
-                    console.log(differenceInMinutes);
-                    if (TIME[time] === differenceInMinutes) {
-                      if (macd < raw.macd) {
-                        console.log("Sell Plz Less Than The Previous Value");
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            macd: false,
-                            "raw.macd": macd,
-                          },
-                          { new: true }
-                        );
-                        momentum = true;
-                      } else {
-                        console.log("Wait Greater than the previous value");
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            // hasPurchasedCoins: true,
-                            macd: true,
-                            "raw.macd": macd,
-                          },
-                          { new: true }
-                        );
-                      }
-                    }
-                  }
+                  //   if (TIME[time] === differenceInMinutes) {
+                  //     if (macd < macdValue) {
+                  //       console.log("Sell Plz Less Than The Previous Value");
+                  //       await BotSetting.findByIdAndUpdate(
+                  //         setting_id,
+                  //         {
+                  //           macd: false,
+                  //           macdValue: macd,
+                  //           macdUpdatedAt: Date.now(),
+                  //         },
+                  //         { new: true }
+                  //       );
+                  //       momentum = true;
+                  //     } else {
+                  //       console.log("Wait Greater than the previous value");
+                  //       await BotSetting.findByIdAndUpdate(
+                  //         setting_id,
+                  //         {
+                  //           // hasPurchasedCoins: true,
+                  //           macd: true,
+                  //           macdValue: macd,
+                  //           macdUpdatedAt: Date.now(),
+                  //         },
+                  //         { new: true }
+                  //       );
+                  //     }
+                  //   }
+                  //   console.log("Momentum : ", momentum);
+                  // } else {
+
+                  // }
 
                   // return;
                   if (signal === "SELL") {
@@ -382,7 +406,15 @@ const cb = _.debounce(
                       { new: true }
                     );
                   }
-
+                  if (signal === "BUY") {
+                    await BotSetting.findByIdAndUpdate(
+                      setting_id,
+                      {
+                        macd: true,
+                      },
+                      { new: true }
+                    );
+                  }
                   // return;
                   if (hasPurchasedCoins) {
                     let takeProfitCondition = false;
@@ -438,7 +470,7 @@ const cb = _.debounce(
                       await BotSetting.findByIdAndUpdate(
                         setting_id,
                         {
-                          macd: false,
+                          // macd: false,
                           takeProfit: 0,
                         },
                         { new: true }
@@ -463,8 +495,9 @@ const cb = _.debounce(
                         setting_id,
                         {
                           hasPurchasedCoins: true,
-                          "raw.macd": macd,
-                          macd: false,
+                          macdValue: macd,
+                          // macd: false,
+                          macdUpdatedAt: Date.now(),
                         },
                         { new: true }
                       );
@@ -473,9 +506,6 @@ const cb = _.debounce(
                 }
               } // Manual Bot Block
               else {
-                // NOTE:: MANUAL LOGGER
-                // return;
-
                 console.log(
                   {
                     u: up,
