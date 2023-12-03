@@ -634,7 +634,7 @@ const getPositionRisk = asyncHandlerMiddleware(async (req, res) => {
         { sell: result.entryPrice, side: result.side, buy: 0 },
         { new: true }
       ).then(() => console.log);
-    } else {
+    } else if (result.side == "UNKNOWN") {
       LeverageHistory.findOneAndUpdate(
         {
           user: id,
