@@ -325,17 +325,18 @@ const cb = _.debounce(
                   // MACD BLOCK
                   const { signal, macd } = await getMACD(symbol, time);
                   if (!signal) return;
-                  console.log(
-                    {
-                      i: investment,
-                      t: time,
-                      hasPurchasedCoins: hasPurchasedCoins,
-                      signal: signal,
-                      macd: macd,
-                    },
-                    "MACD"
-                  );
-                  console.log(macdValue, macdUpdatedAt);
+                  // console.log(
+                  //   {
+                  //     i: investment,
+                  //     t: time,
+                  //     hasPurchasedCoins: hasPurchasedCoins,
+                  //     signal: signal,
+                  //     macd: macd,
+                  //   },
+                  //   "MACD"
+                  // );
+                  // console.log(macdValue, macdUpdatedAt);
+
                   // if (signal === "BUY") {
                   //   if (macd < macdValue) {
                   //     await BotSetting.findByIdAndUpdate(
@@ -397,25 +398,26 @@ const cb = _.debounce(
                   // }
 
                   // return;
-                  if (signal === "SELL") {
-                    await BotSetting.findByIdAndUpdate(
-                      setting_id,
-                      {
-                        macd: true,
-                      },
-                      { new: true }
-                    );
-                  }
-                  if (signal === "BUY") {
-                    await BotSetting.findByIdAndUpdate(
-                      setting_id,
-                      {
-                        macd: true,
-                      },
-                      { new: true }
-                    );
-                  }
+                  // if (signal === "SELL") {
+                  //   await BotSetting.findByIdAndUpdate(
+                  //     setting_id,
+                  //     {
+                  //       macd: true,
+                  //     },
+                  //     { new: true }
+                  //   );
+                  // }
+                  // if (signal === "BUY") {
+                  //   await BotSetting.findByIdAndUpdate(
+                  //     setting_id,
+                  //     {
+                  //       macd: true,
+                  //     },
+                  //     { new: true }
+                  //   );
+                  // }
                   // return;
+
                   if (hasPurchasedCoins) {
                     let takeProfitCondition = false;
                     console.log(takeProfit);
@@ -436,25 +438,20 @@ const cb = _.debounce(
                         );
                       }
                     } else {
-                      if (currentPrice > raw.price + 5) {
+                      if (currentPrice > raw.price + 7) {
                         await BotSetting.findByIdAndUpdate(
                           setting_id,
                           {
-                            takeProfit: currentPrice,
+                            takeProfit: currentPrice - 2,
                           },
                           { new: true }
                         );
                       }
                     }
 
-                    // let sellCondition = false;
                     console.log("Take Profit Condition", takeProfitCondition);
-                    // console.log("Momentum", momentum);
                     let sellCondition =
                       signal === "SELL" || takeProfitCondition;
-                    // if (takeProfitCondition) {
-                    //   sellCondition = true;
-                    // }
                     console.log(sellCondition);
                     // return;
                     if (sellCondition) {
@@ -470,7 +467,6 @@ const cb = _.debounce(
                       await BotSetting.findByIdAndUpdate(
                         setting_id,
                         {
-                          // macd: false,
                           takeProfit: 0,
                         },
                         { new: true }
@@ -579,6 +575,6 @@ const cb = _.debounce(
       console.log(error);
     }
   },
-  2000,
+  1200,
   { leading: false, maxWait: 2000, trailing: true }
 );

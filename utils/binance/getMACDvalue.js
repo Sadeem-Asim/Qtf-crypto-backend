@@ -31,7 +31,7 @@ const calculateMACD = (candles) => {
 
 const checkSignal = (macdValues) => {
   const lastMACD = macdValues[macdValues.length - 1];
-  console.log(lastMACD);
+  // console.log(lastMACD);
   if (lastMACD.MACD > lastMACD.signal) {
     return { signal: "BUY", macd: lastMACD.histogram };
   } else if (lastMACD.MACD < lastMACD.signal) {
