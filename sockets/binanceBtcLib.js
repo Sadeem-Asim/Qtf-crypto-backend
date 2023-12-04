@@ -325,6 +325,15 @@ const cb = _.debounce(
                   // MACD BLOCK
                   const { signal, macd } = await getMACD(symbol, time);
                   if (!signal) return;
+                  if (signal === "SELL") {
+                    await BotSetting.findByIdAndUpdate(
+                      setting_id,
+                      {
+                        macd: true,
+                      },
+                      { new: true }
+                    );
+                  }
 
                   if (hasPurchasedCoins) {
                     let takeProfitCondition = false;
@@ -336,6 +345,13 @@ const cb = _.debounce(
                       currentPrice < raw.price - 15
                     ) {
                       takeProfitCondition = true;
+                      await BotSetting.findByIdAndUpdate(
+                        setting_id,
+                        {
+                          macd: false,
+                        },
+                        { new: true }
+                      );
                     }
                     if (takeProfit !== 0) {
                       if (
