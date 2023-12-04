@@ -60,3 +60,95 @@ const runBot = async (symbol = "BTCUSDT", interval = "1m") => {
     console.log(result);
   }, 1000);
 })();
+// console.log(
+//   {
+//     i: investment,
+//     t: time,
+//     hasPurchasedCoins: hasPurchasedCoins,
+//     signal: signal,
+//     macd: macd,
+//   },
+//   "MACD"
+// );
+// console.log(macdValue, macdUpdatedAt);
+
+// if (signal === "BUY") {
+//   if (macd < macdValue) {
+//     await BotSetting.findByIdAndUpdate(
+//       setting_id,
+//       {
+//         macd: false,
+//       },
+//       { new: true }
+//     );
+//   } else {
+//     await BotSetting.findByIdAndUpdate(
+//       setting_id,
+//       {
+//         macd: true,
+//       },
+//       { new: true }
+//     );
+//   }
+//   let momentum = false;
+//   console.log("RAW.MACD", macdValue);
+//   const currentDateTime = moment();
+//   const specifiedDateTime = moment(macdUpdatedAt);
+//   const differenceInMinutes = currentDateTime.diff(
+//     specifiedDateTime,
+//     "minutes"
+//   );
+//   console.log(differenceInMinutes);
+
+//   if (TIME[time] === differenceInMinutes) {
+//     if (macd < macdValue) {
+//       console.log("Sell Plz Less Than The Previous Value");
+//       await BotSetting.findByIdAndUpdate(
+//         setting_id,
+//         {
+//           macd: false,
+//           macdValue: macd,
+//           macdUpdatedAt: Date.now(),
+//         },
+//         { new: true }
+//       );
+//       momentum = true;
+//     } else {
+//       console.log("Wait Greater than the previous value");
+//       await BotSetting.findByIdAndUpdate(
+//         setting_id,
+//         {
+//           // hasPurchasedCoins: true,
+//           macd: true,
+//           macdValue: macd,
+//           macdUpdatedAt: Date.now(),
+//         },
+//         { new: true }
+//       );
+//     }
+//   }
+//   console.log("Momentum : ", momentum);
+// } else {
+
+// }
+
+// return;
+// if (signal === "SELL") {
+//   await BotSetting.findByIdAndUpdate(
+//     setting_id,
+//     {
+//       macd: true,
+//     },
+//     { new: true }
+//   );
+// }
+// if (signal === "BUY") {
+//   await BotSetting.findByIdAndUpdate(
+//     setting_id,
+//     {
+//       macd: true,
+//     },
+//     { new: true }
+//   );
+// }
+// return;
