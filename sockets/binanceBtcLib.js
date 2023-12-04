@@ -348,12 +348,11 @@ const cb = _.debounce(
                       await BotSetting.findByIdAndUpdate(
                         setting_id,
                         {
-                          macd: false,
+                          macd: true,
                         },
                         { new: true }
                       );
-                    }
-                    if (takeProfit !== 0) {
+                    } else if (takeProfit !== 0) {
                       if (
                         currentPrice < takeProfit ||
                         currentPrice > raw.price + 20
@@ -370,11 +369,11 @@ const cb = _.debounce(
                         );
                       }
                     } else {
-                      if (currentPrice > raw.price + 7) {
+                      if (currentPrice > raw.price + 6) {
                         await BotSetting.findByIdAndUpdate(
                           setting_id,
                           {
-                            takeProfit: currentPrice - 2,
+                            takeProfit: currentPrice - 1,
                           },
                           { new: true }
                         );
