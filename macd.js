@@ -60,7 +60,10 @@ const runBot = async (symbol = "BTCUSDT", interval = "1m") => {
     console.log(result);
   }, 1000);
 })();
-// console.log(
+
+// return;
+// if (signal === "SELL") {
+//   await Bot// console.log(
 //   {
 //     i: investment,
 //     t: time,
@@ -130,11 +133,7 @@ const runBot = async (symbol = "BTCUSDT", interval = "1m") => {
 //   console.log("Momentum : ", momentum);
 // } else {
 
-// }
-
-// return;
-// if (signal === "SELL") {
-//   await BotSetting.findByIdAndUpdate(
+// }Setting.findByIdAndUpdate(
 //     setting_id,
 //     {
 //       macd: true,

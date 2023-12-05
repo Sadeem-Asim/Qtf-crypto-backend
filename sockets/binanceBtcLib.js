@@ -145,6 +145,12 @@ const TIME = {
   "12 hours": 15,
 };
 
+const sellTime = {
+  "3m": "1m",
+  "5m": "3m",
+  "15m": "5m",
+};
+
 const cb = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
     try {
@@ -325,11 +331,22 @@ const cb = _.debounce(
                   // MACD BLOCK
                   const { signal, macd } = await getMACD(symbol, time);
                   if (!signal) return;
+                  console.log(
+                    {
+                      i: investment,
+                      t: time,
+                      hasPurchasedCoins: hasPurchasedCoins,
+                      signal: signal,
+                      macd: macd,
+                    },
+                    "MACD"
+                  );
                   if (signal === "SELL") {
                     await BotSetting.findByIdAndUpdate(
                       setting_id,
                       {
                         macd: true,
+                        macd: 0,
                       },
                       { new: true }
                     );
@@ -337,48 +354,118 @@ const cb = _.debounce(
 
                   if (hasPurchasedCoins) {
                     let takeProfitCondition = false;
+                    // console.log(macdValue, macdUpdatedAt);
                     console.log(takeProfit);
                     if (
-                      (TIME[time] === 3 ||
-                        TIME[time] === 5 ||
-                        TIME[time] === 1) &&
-                      currentPrice < raw.price - 15
+                      TIME[time] === 3 ||
+                      TIME[time] === 5 ||
+                      TIME[time] === 15
                     ) {
-                      takeProfitCondition = true;
-                      await BotSetting.findByIdAndUpdate(
-                        setting_id,
-                        {
-                          macd: true,
-                        },
-                        { new: true }
-                      );
-                    } else if (takeProfit !== 0) {
-                      if (
-                        currentPrice < takeProfit ||
-                        currentPrice > raw.price + 20
-                      ) {
+                      if (currentPrice < raw.price - 20) {
                         takeProfitCondition = true;
                       }
-                      if (currentPrice > takeProfit + 10) {
+                      if (takeProfit !== 0) {
+                        if (currentPrice <= takeProfit) {
+                          takeProfitCondition = true;
+                        }
+                        if (currentPrice > takeProfit + 10) {
+                          await BotSetting.findByIdAndUpdate(
+                            setting_id,
+                            {
+                              takeProfit: currentPrice - 3,
+                            },
+                            { new: true }
+                          );
+                        }
+                      } else {
+                        if (currentPrice > raw.price + 5) {
+                          await BotSetting.findByIdAndUpdate(
+                            setting_id,
+                            {
+                              takeProfit: currentPrice - 1,
+                            },
+                            { new: true }
+                          );
+                        }
+                      }
+                      const { signal: signal2 } = await getMACD(
+                        symbol,
+                        sellTime[time]
+                      );
+
+                      if (signal2 === "SELL") {
+                        takeProfitCondition = true;
                         await BotSetting.findByIdAndUpdate(
                           setting_id,
                           {
-                            takeProfit: currentPrice - 3,
+                            macd: false,
                           },
                           { new: true }
                         );
                       }
                     } else {
-                      if (currentPrice > raw.price + 6) {
+                      if (takeProfit !== 0) {
+                        if (currentPrice < takeProfit) {
+                          takeProfitCondition = true;
+                        }
+                        if (currentPrice > takeProfit + 10) {
+                          await BotSetting.findByIdAndUpdate(
+                            setting_id,
+                            {
+                              takeProfit: currentPrice - 3,
+                            },
+                            { new: true }
+                          );
+                        }
+                      } else {
+                        if (currentPrice > raw.price + 10) {
+                          await BotSetting.findByIdAndUpdate(
+                            setting_id,
+                            {
+                              takeProfit: currentPrice - 3,
+                            },
+                            { new: true }
+                          );
+                        }
+                      }
+                    }
+
+                    let momentum = false;
+                    const currentDateTime = moment();
+                    const specifiedDateTime = moment(macdUpdatedAt);
+                    const differenceInMinutes = currentDateTime.diff(
+                      specifiedDateTime,
+                      "minutes"
+                    );
+                    console.log("Difference In Minutes", differenceInMinutes);
+
+                    if (TIME[time] === differenceInMinutes) {
+                      if (macd < macdValue) {
+                        console.log("Sell Plz Less Than The Previous Value");
                         await BotSetting.findByIdAndUpdate(
                           setting_id,
                           {
-                            takeProfit: currentPrice - 1,
+                            macd: false,
+                            macdValue: macd,
+                            macdUpdatedAt: Date.now(),
+                          },
+                          { new: true }
+                        );
+                        momentum = true;
+                      } else {
+                        console.log("Wait Greater than the previous value");
+                        await BotSetting.findByIdAndUpdate(
+                          setting_id,
+                          {
+                            macd: true,
+                            macdValue: macd,
+                            macdUpdatedAt: Date.now(),
                           },
                           { new: true }
                         );
                       }
                     }
+                    console.log("Momentum : ", momentum);
 
                     console.log("Take Profit Condition", takeProfitCondition);
                     let sellCondition =
@@ -418,16 +505,25 @@ const cb = _.debounce(
                         currentPrice,
                       };
                       await buyOrder(buyOrderParams);
-                      await BotSetting.findByIdAndUpdate(
-                        setting_id,
-                        {
-                          hasPurchasedCoins: true,
-                          macdValue: macd,
-                          // macd: false,
-                          macdUpdatedAt: Date.now(),
-                        },
-                        { new: true }
-                      );
+                      if (macd === 0) {
+                        await BotSetting.findByIdAndUpdate(
+                          setting_id,
+                          {
+                            hasPurchasedCoins: true,
+                            macdValue: macd,
+                            macdUpdatedAt: Date.now(),
+                          },
+                          { new: true }
+                        );
+                      } else {
+                        await BotSetting.findByIdAndUpdate(
+                          setting_id,
+                          {
+                            hasPurchasedCoins: true,
+                          },
+                          { new: true }
+                        );
+                      }
                     }
                   }
                 }
