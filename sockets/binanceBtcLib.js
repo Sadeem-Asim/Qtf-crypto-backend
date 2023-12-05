@@ -136,13 +136,13 @@ const TIME = {
   "3m": 3,
   "5m": 5,
   "15m": 15,
-  "30m": 15,
-  "1h": 15,
-  "2h": 15,
-  "4h": 15,
-  "6h": 15,
-  "8 hours": 15,
-  "12 hours": 15,
+  "30m": 16,
+  "1h": 16,
+  "2h": 16,
+  "4h": 16,
+  "6h": 16,
+  "8 hours": 16,
+  "12 hours": 16,
 };
 
 const sellTime = {
@@ -350,6 +350,43 @@ const cb = _.debounce(
                       },
                       { new: true }
                     );
+                  } else if (signal === "BUY") {
+                    let momentum = false;
+                    const currentDateTime = moment();
+                    const specifiedDateTime = moment(macdUpdatedAt);
+                    const differenceInMinutes = currentDateTime.diff(
+                      specifiedDateTime,
+                      "minutes"
+                    );
+                    console.log("Difference In Minutes", differenceInMinutes);
+
+                    if (TIME[time] === differenceInMinutes) {
+                      if (macd < macdValue) {
+                        console.log("Sell Plz Less Than The Previous Value");
+                        await BotSetting.findByIdAndUpdate(
+                          setting_id,
+                          {
+                            macd: false,
+                            macdValue: macd,
+                            macdUpdatedAt: Date.now(),
+                          },
+                          { new: true }
+                        );
+                        momentum = true;
+                      } else {
+                        console.log("Wait Greater than the previous value");
+                        await BotSetting.findByIdAndUpdate(
+                          setting_id,
+                          {
+                            macd: true,
+                            macdValue: macd,
+                            macdUpdatedAt: Date.now(),
+                          },
+                          { new: true }
+                        );
+                      }
+                    }
+                    console.log("Momentum : ", momentum);
                   }
 
                   if (hasPurchasedCoins) {
@@ -429,47 +466,11 @@ const cb = _.debounce(
                         }
                       }
                     }
-
-                    let momentum = false;
-                    const currentDateTime = moment();
-                    const specifiedDateTime = moment(macdUpdatedAt);
-                    const differenceInMinutes = currentDateTime.diff(
-                      specifiedDateTime,
-                      "minutes"
-                    );
-                    console.log("Difference In Minutes", differenceInMinutes);
-
-                    if (TIME[time] === differenceInMinutes) {
-                      if (macd < macdValue) {
-                        console.log("Sell Plz Less Than The Previous Value");
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            macd: false,
-                            macdValue: macd,
-                            macdUpdatedAt: Date.now(),
-                          },
-                          { new: true }
-                        );
-                        momentum = true;
-                      } else {
-                        console.log("Wait Greater than the previous value");
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            macd: true,
-                            macdValue: macd,
-                            macdUpdatedAt: Date.now(),
-                          },
-                          { new: true }
-                        );
-                      }
-                    }
-                    console.log("Momentum : ", momentum);
-
                     console.log("Take Profit Condition", takeProfitCondition);
                     let sellCondition =
-                      signal === "SELL" || takeProfitCondition;
+                      signal === "SELL" ||
+                      takeProfitCondition ||
+                      setting.macd === false;
                     console.log(sellCondition);
                     // return;
                     if (sellCondition) {
