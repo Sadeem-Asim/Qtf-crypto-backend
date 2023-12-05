@@ -346,7 +346,7 @@ const cb = _.debounce(
                       setting_id,
                       {
                         macd: true,
-                        macd: 0,
+                        macdValue: 0,
                       },
                       { new: true }
                     );
