@@ -505,7 +505,7 @@ const cb = _.debounce(
                         currentPrice,
                       };
                       await buyOrder(buyOrderParams);
-                      if (macd === 0) {
+                      if (macdValue === 0) {
                         await BotSetting.findByIdAndUpdate(
                           setting_id,
                           {
