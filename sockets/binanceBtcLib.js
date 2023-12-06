@@ -350,127 +350,127 @@ const cb = _.debounce(
                       },
                       { new: true }
                     );
-                  } else if (signal === "BUY") {
-                    let momentum = false;
-                    const currentDateTime = moment();
-                    const specifiedDateTime = moment(macdUpdatedAt);
-                    const differenceInMinutes = currentDateTime.diff(
-                      specifiedDateTime,
-                      "minutes"
-                    );
-                    console.log("Difference In Minutes", differenceInMinutes);
-
-                    if (TIME[time] === differenceInMinutes) {
-                      if (macd < macdValue) {
-                        console.log("Sell Plz Less Than The Previous Value");
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            macd: false,
-                            macdValue: macd,
-                            macdUpdatedAt: Date.now(),
-                          },
-                          { new: true }
-                        );
-                        momentum = true;
-                      } else {
-                        console.log("Wait Greater than the previous value");
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            macd: true,
-                            macdValue: macd,
-                            macdUpdatedAt: Date.now(),
-                          },
-                          { new: true }
-                        );
-                      }
-                    }
-                    console.log("Momentum : ", momentum);
                   }
+                  // if (signal === "BUY") {
+                  //   let momentum = false;
+                  //   const currentDateTime = moment();
+                  //   const specifiedDateTime = moment(macdUpdatedAt);
+                  //   const differenceInMinutes = currentDateTime.diff(
+                  //     specifiedDateTime,
+                  //     "minutes"
+                  //   );
+                  //   console.log("Difference In Minutes", differenceInMinutes);
+
+                  //   if (TIME[time] === differenceInMinutes) {
+                  //     if (macd < macdValue) {
+                  //       console.log("Sell Plz Less Than The Previous Value");
+                  //       await BotSetting.findByIdAndUpdate(
+                  //         setting_id,
+                  //         {
+                  //           macd: false,
+                  //           macdValue: macd,
+                  //           macdUpdatedAt: Date.now(),
+                  //         },
+                  //         { new: true }
+                  //       );
+                  //       momentum = true;
+                  //     } else {
+                  //       console.log("Wait Greater than the previous value");
+                  //       await BotSetting.findByIdAndUpdate(
+                  //         setting_id,
+                  //         {
+                  //           macd: true,
+                  //           macdValue: macd,
+                  //           macdUpdatedAt: Date.now(),
+                  //         },
+                  //         { new: true }
+                  //       );
+                  //     }
+                  //   }
+                  //   console.log("Momentum : ", momentum);
+                  // }
 
                   if (hasPurchasedCoins) {
                     let takeProfitCondition = false;
                     // console.log(macdValue, macdUpdatedAt);
                     console.log(takeProfit);
-                    if (
-                      TIME[time] === 3 ||
-                      TIME[time] === 5 ||
-                      TIME[time] === 15
-                    ) {
-                      if (currentPrice < raw.price - 20) {
-                        takeProfitCondition = true;
-                      }
-                      if (takeProfit !== 0) {
-                        if (currentPrice <= takeProfit) {
-                          takeProfitCondition = true;
-                        }
-                        if (currentPrice > takeProfit + 10) {
-                          await BotSetting.findByIdAndUpdate(
-                            setting_id,
-                            {
-                              takeProfit: currentPrice - 3,
-                            },
-                            { new: true }
-                          );
-                        }
-                      } else {
-                        if (currentPrice > raw.price + 5) {
-                          await BotSetting.findByIdAndUpdate(
-                            setting_id,
-                            {
-                              takeProfit: currentPrice - 1,
-                            },
-                            { new: true }
-                          );
-                        }
-                      }
-                      const { signal: signal2 } = await getMACD(
-                        symbol,
-                        sellTime[time]
-                      );
+                    // if (
+                    //   TIME[time] === 3 ||
+                    //   TIME[time] === 5 ||
+                    //   TIME[time] === 15
+                    // ) {
+                    //   if (currentPrice < raw.price - 20) {
+                    //     takeProfitCondition = true;
+                    //   }
+                    //   if (takeProfit !== 0) {
+                    //     if (currentPrice <= takeProfit) {
+                    //       takeProfitCondition = true;
+                    //     }
+                    //     if (currentPrice > takeProfit + 10) {
+                    //       await BotSetting.findByIdAndUpdate(
+                    //         setting_id,
+                    //         {
+                    //           takeProfit: currentPrice - 3,
+                    //         },
+                    //         { new: true }
+                    //       );
+                    //     }
+                    //   } else {
+                    //     if (currentPrice > raw.price + 5) {
+                    //       await BotSetting.findByIdAndUpdate(
+                    //         setting_id,
+                    //         {
+                    //           takeProfit: currentPrice - 1,
+                    //         },
+                    //         { new: true }
+                    //       );
+                    //     }
+                    //   }
+                    //   const { signal: signal2 } = await getMACD(
+                    //     symbol,
+                    //     sellTime[time]
+                    //   );
 
-                      if (signal2 === "SELL") {
+                    //   if (signal2 === "SELL") {
+                    //     takeProfitCondition = true;
+                    //     await BotSetting.findByIdAndUpdate(
+                    //       setting_id,
+                    //       {
+                    //         macd: false,
+                    //       },
+                    //       { new: true }
+                    //     );
+                    //   }
+                    // } else {
+                    if (takeProfit !== 0) {
+                      if (currentPrice < takeProfit) {
                         takeProfitCondition = true;
+                      }
+                      if (currentPrice > takeProfit + 10) {
                         await BotSetting.findByIdAndUpdate(
                           setting_id,
                           {
-                            macd: false,
+                            takeProfit: currentPrice - 3,
                           },
                           { new: true }
                         );
                       }
                     } else {
-                      if (takeProfit !== 0) {
-                        if (currentPrice < takeProfit) {
-                          takeProfitCondition = true;
-                        }
-                        if (currentPrice > takeProfit + 10) {
-                          await BotSetting.findByIdAndUpdate(
-                            setting_id,
-                            {
-                              takeProfit: currentPrice - 3,
-                            },
-                            { new: true }
-                          );
-                        }
-                      } else {
-                        if (currentPrice > raw.price + 10) {
-                          await BotSetting.findByIdAndUpdate(
-                            setting_id,
-                            {
-                              takeProfit: currentPrice - 3,
-                            },
-                            { new: true }
-                          );
-                        }
+                      if (currentPrice > raw.price + 10) {
+                        await BotSetting.findByIdAndUpdate(
+                          setting_id,
+                          {
+                            takeProfit: currentPrice - 3,
+                          },
+                          { new: true }
+                        );
                       }
                     }
+                    // }
                     console.log("Take Profit Condition", takeProfitCondition);
                     let sellCondition =
-                      signal === "SELL" ||
-                      takeProfitCondition ||
-                      setting.macd === false;
+                      signal === "SELL" || takeProfitCondition;
+                    //  || setting.macd === false;
                     console.log(sellCondition);
                     // return;
                     if (sellCondition) {

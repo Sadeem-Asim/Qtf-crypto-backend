@@ -18,8 +18,8 @@ const calculateMACD = (candles) => {
   const closes = candles.map((candle) => parseFloat(candle[4]));
   const macdInput = {
     values: closes,
-    fastPeriod: 12,
-    slowPeriod: 26,
+    fastPeriod: 24,
+    slowPeriod: 52,
     signalPeriod: 9,
     SimpleMAOscillator: false,
     SimpleMASignal: false,
