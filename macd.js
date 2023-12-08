@@ -45,6 +45,7 @@ const checkSignal = (macdValues) => {
 const runBot = async (symbol = "BTCUSDT", interval = "1m") => {
   try {
     const ticks = await binance.candlesticks(symbol, interval);
+    console.log(ticks);
     const macdValues = calculateMACD(ticks);
     const res = checkSignal(macdValues);
     return res;

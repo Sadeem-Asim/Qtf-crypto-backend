@@ -7,6 +7,7 @@ import fetchRSIValues from "#utils/taapi/fetchRSIValues";
 import leverageMarketClose from "#utils/binance/leverageMarketClose";
 import leverageMarketOpen from "#utils/binance/leverageMarketOpen";
 import getMACD from "#utils/binance/getMACDvalue";
+import getScRsi from "#utils/binance/getSchoasticRSI";
 import _ from "lodash";
 import inRange from "#utils/common/inRange";
 import { BotSetting } from "#models/bot_setting.model";
@@ -202,7 +203,7 @@ const cb = _.debounce(
                 macdValue,
                 macdUpdatedAt,
               } = setting;
-              // if (setting_id.toString() !== "6564aa6b4fededeae2b55d89") return;
+              if (setting_id.toString() !== "6564aa6b4fededeae2b55d89") return;
 
               const stopCondition = currentPrice <= stop_at;
               // console.log(stopCondition, stop_at);
@@ -327,206 +328,211 @@ const cb = _.debounce(
                       // await stopBot({ setting_id, currentPrice });
                     }
                   }
-                } else if (indicator === INDICATORS[2]) {
-                  // MACD BLOCK
-                  const { signal, macd } = await getMACD(symbol, time);
-                  if (!signal) return;
-                  console.log(
-                    {
-                      i: investment,
-                      t: time,
-                      hasPurchasedCoins: hasPurchasedCoins,
-                      signal: signal,
-                      macd: macd,
-                    },
-                    "MACD"
-                  );
-                  if (signal === "SELL") {
-                    await BotSetting.findByIdAndUpdate(
-                      setting_id,
-                      {
-                        macd: true,
-                        macdValue: 0,
-                      },
-                      { new: true }
-                    );
-                  }
-                  // if (signal === "BUY") {
-                  //   let momentum = false;
-                  //   const currentDateTime = moment();
-                  //   const specifiedDateTime = moment(macdUpdatedAt);
-                  //   const differenceInMinutes = currentDateTime.diff(
-                  //     specifiedDateTime,
-                  //     "minutes"
-                  //   );
-                  //   console.log("Difference In Minutes", differenceInMinutes);
+                }
+                //  else if (indicator === INDICATORS[2]) {
+                //   // MACD BLOCK
+                //   const { signal, macd } = await getMACD(symbol, time);
+                //   if (!signal) return;
+                //   console.log(
+                //     {
+                //       i: investment,
+                //       t: time,
+                //       hasPurchasedCoins: hasPurchasedCoins,
+                //       signal: signal,
+                //       macd: macd,
+                //     },
+                //     "MACD"
+                //   );
+                //   if (signal === "SELL") {
+                //     await BotSetting.findByIdAndUpdate(
+                //       setting_id,
+                //       {
+                //         macd: true,
+                //         macdValue: 0,
+                //       },
+                //       { new: true }
+                //     );
+                //   }
+                //   // if (signal === "BUY") {
+                //   //   let momentum = false;
+                //   //   const currentDateTime = moment();
+                //   //   const specifiedDateTime = moment(macdUpdatedAt);
+                //   //   const differenceInMinutes = currentDateTime.diff(
+                //   //     specifiedDateTime,
+                //   //     "minutes"
+                //   //   );
+                //   //   console.log("Difference In Minutes", differenceInMinutes);
 
-                  //   if (TIME[time] === differenceInMinutes) {
-                  //     if (macd < macdValue) {
-                  //       console.log("Sell Plz Less Than The Previous Value");
-                  //       await BotSetting.findByIdAndUpdate(
-                  //         setting_id,
-                  //         {
-                  //           macd: false,
-                  //           macdValue: macd,
-                  //           macdUpdatedAt: Date.now(),
-                  //         },
-                  //         { new: true }
-                  //       );
-                  //       momentum = true;
-                  //     } else {
-                  //       console.log("Wait Greater than the previous value");
-                  //       await BotSetting.findByIdAndUpdate(
-                  //         setting_id,
-                  //         {
-                  //           macd: true,
-                  //           macdValue: macd,
-                  //           macdUpdatedAt: Date.now(),
-                  //         },
-                  //         { new: true }
-                  //       );
-                  //     }
-                  //   }
-                  //   console.log("Momentum : ", momentum);
-                  // }
+                //   //   if (TIME[time] === differenceInMinutes) {
+                //   //     if (macd < macdValue) {
+                //   //       console.log("Sell Plz Less Than The Previous Value");
+                //   //       await BotSetting.findByIdAndUpdate(
+                //   //         setting_id,
+                //   //         {
+                //   //           macd: false,
+                //   //           macdValue: macd,
+                //   //           macdUpdatedAt: Date.now(),
+                //   //         },
+                //   //         { new: true }
+                //   //       );
+                //   //       momentum = true;
+                //   //     } else {
+                //   //       console.log("Wait Greater than the previous value");
+                //   //       await BotSetting.findByIdAndUpdate(
+                //   //         setting_id,
+                //   //         {
+                //   //           macd: true,
+                //   //           macdValue: macd,
+                //   //           macdUpdatedAt: Date.now(),
+                //   //         },
+                //   //         { new: true }
+                //   //       );
+                //   //     }
+                //   //   }
+                //   //   console.log("Momentum : ", momentum);
+                //   // }
 
-                  if (hasPurchasedCoins) {
-                    let takeProfitCondition = false;
-                    // console.log(macdValue, macdUpdatedAt);
-                    console.log(takeProfit);
-                    // if (
-                    //   TIME[time] === 3 ||
-                    //   TIME[time] === 5 ||
-                    //   TIME[time] === 15
-                    // ) {
-                    //   if (currentPrice < raw.price - 20) {
-                    //     takeProfitCondition = true;
-                    //   }
-                    //   if (takeProfit !== 0) {
-                    //     if (currentPrice <= takeProfit) {
-                    //       takeProfitCondition = true;
-                    //     }
-                    //     if (currentPrice > takeProfit + 10) {
-                    //       await BotSetting.findByIdAndUpdate(
-                    //         setting_id,
-                    //         {
-                    //           takeProfit: currentPrice - 3,
-                    //         },
-                    //         { new: true }
-                    //       );
-                    //     }
-                    //   } else {
-                    //     if (currentPrice > raw.price + 5) {
-                    //       await BotSetting.findByIdAndUpdate(
-                    //         setting_id,
-                    //         {
-                    //           takeProfit: currentPrice - 1,
-                    //         },
-                    //         { new: true }
-                    //       );
-                    //     }
-                    //   }
-                    //   const { signal: signal2 } = await getMACD(
-                    //     symbol,
-                    //     sellTime[time]
-                    //   );
+                //   if (hasPurchasedCoins) {
+                //     let takeProfitCondition = false;
+                //     // console.log(macdValue, macdUpdatedAt);
+                //     console.log(takeProfit);
+                //     // if (
+                //     //   TIME[time] === 3 ||
+                //     //   TIME[time] === 5 ||
+                //     //   TIME[time] === 15
+                //     // ) {
+                //     //   if (currentPrice < raw.price - 20) {
+                //     //     takeProfitCondition = true;
+                //     //   }
+                //     //   if (takeProfit !== 0) {
+                //     //     if (currentPrice <= takeProfit) {
+                //     //       takeProfitCondition = true;
+                //     //     }
+                //     //     if (currentPrice > takeProfit + 10) {
+                //     //       await BotSetting.findByIdAndUpdate(
+                //     //         setting_id,
+                //     //         {
+                //     //           takeProfit: currentPrice - 3,
+                //     //         },
+                //     //         { new: true }
+                //     //       );
+                //     //     }
+                //     //   } else {
+                //     //     if (currentPrice > raw.price + 5) {
+                //     //       await BotSetting.findByIdAndUpdate(
+                //     //         setting_id,
+                //     //         {
+                //     //           takeProfit: currentPrice - 1,
+                //     //         },
+                //     //         { new: true }
+                //     //       );
+                //     //     }
+                //     //   }
+                //     //   const { signal: signal2 } = await getMACD(
+                //     //     symbol,
+                //     //     sellTime[time]
+                //     //   );
 
-                    //   if (signal2 === "SELL") {
-                    //     takeProfitCondition = true;
-                    //     await BotSetting.findByIdAndUpdate(
-                    //       setting_id,
-                    //       {
-                    //         macd: false,
-                    //       },
-                    //       { new: true }
-                    //     );
-                    //   }
-                    // } else {
-                    if (takeProfit !== 0) {
-                      if (currentPrice < takeProfit) {
-                        takeProfitCondition = true;
-                      }
-                      if (currentPrice > takeProfit + 10) {
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            takeProfit: currentPrice - 3,
-                          },
-                          { new: true }
-                        );
-                      }
-                    } else {
-                      if (currentPrice > raw.price + 10) {
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            takeProfit: currentPrice - 3,
-                          },
-                          { new: true }
-                        );
-                      }
-                    }
-                    // }
-                    console.log("Take Profit Condition", takeProfitCondition);
-                    let sellCondition =
-                      signal === "SELL" || takeProfitCondition;
-                    //  || setting.macd === false;
-                    console.log(sellCondition);
-                    // return;
-                    if (sellCondition) {
-                      const sellOrderParams = {
-                        symbol,
-                        bot_id: _id,
-                        setting_id,
-                        user_id: user,
-                        quantity: raw?.qty,
-                        currentPrice,
-                      };
-                      await sellOrder(sellOrderParams, { raw, investment });
-                      await BotSetting.findByIdAndUpdate(
-                        setting_id,
-                        {
-                          takeProfit: 0,
-                        },
-                        { new: true }
-                      );
-                    }
-                  } else {
-                    const buyCondition =
-                      signal === "BUY" && setting.macd === true;
-                    console.log(buyCondition);
-                    // return;
-                    if (buyCondition) {
-                      const buyOrderParams = {
-                        symbol,
-                        investment,
-                        setting_id,
-                        bot_id: _id,
-                        user_id: user,
-                        currentPrice,
-                      };
-                      await buyOrder(buyOrderParams);
-                      if (macdValue === 0) {
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            hasPurchasedCoins: true,
-                            macdValue: macd,
-                            macdUpdatedAt: Date.now(),
-                          },
-                          { new: true }
-                        );
-                      } else {
-                        await BotSetting.findByIdAndUpdate(
-                          setting_id,
-                          {
-                            hasPurchasedCoins: true,
-                          },
-                          { new: true }
-                        );
-                      }
-                    }
-                  }
+                //     //   if (signal2 === "SELL") {
+                //     //     takeProfitCondition = true;
+                //     //     await BotSetting.findByIdAndUpdate(
+                //     //       setting_id,
+                //     //       {
+                //     //         macd: false,
+                //     //       },
+                //     //       { new: true }
+                //     //     );
+                //     //   }
+                //     // } else {
+                //     if (takeProfit !== 0) {
+                //       if (currentPrice < takeProfit) {
+                //         takeProfitCondition = true;
+                //       }
+                //       if (currentPrice > takeProfit + 10) {
+                //         await BotSetting.findByIdAndUpdate(
+                //           setting_id,
+                //           {
+                //             takeProfit: currentPrice - 3,
+                //           },
+                //           { new: true }
+                //         );
+                //       }
+                //     } else {
+                //       if (currentPrice > raw.price + 10) {
+                //         await BotSetting.findByIdAndUpdate(
+                //           setting_id,
+                //           {
+                //             takeProfit: currentPrice - 3,
+                //           },
+                //           { new: true }
+                //         );
+                //       }
+                //     }
+                //     // }
+                //     console.log("Take Profit Condition", takeProfitCondition);
+                //     let sellCondition =
+                //       signal === "SELL" || takeProfitCondition;
+                //     //  || setting.macd === false;
+                //     console.log(sellCondition);
+                //     // return;
+                //     if (sellCondition) {
+                //       const sellOrderParams = {
+                //         symbol,
+                //         bot_id: _id,
+                //         setting_id,
+                //         user_id: user,
+                //         quantity: raw?.qty,
+                //         currentPrice,
+                //       };
+                //       await sellOrder(sellOrderParams, { raw, investment });
+                //       await BotSetting.findByIdAndUpdate(
+                //         setting_id,
+                //         {
+                //           takeProfit: 0,
+                //         },
+                //         { new: true }
+                //       );
+                //     }
+                //   } else {
+                //     const buyCondition =
+                //       signal === "BUY" && setting.macd === true;
+                //     console.log(buyCondition);
+                //     // return;
+                //     if (buyCondition) {
+                //       const buyOrderParams = {
+                //         symbol,
+                //         investment,
+                //         setting_id,
+                //         bot_id: _id,
+                //         user_id: user,
+                //         currentPrice,
+                //       };
+                //       await buyOrder(buyOrderParams);
+                //       if (macdValue === 0) {
+                //         await BotSetting.findByIdAndUpdate(
+                //           setting_id,
+                //           {
+                //             hasPurchasedCoins: true,
+                //             macdValue: macd,
+                //             macdUpdatedAt: Date.now(),
+                //           },
+                //           { new: true }
+                //         );
+                //       } else {
+                //         await BotSetting.findByIdAndUpdate(
+                //           setting_id,
+                //           {
+                //             hasPurchasedCoins: true,
+                //           },
+                //           { new: true }
+                //         );
+                //       }
+                //     }
+                //   }
+                // }
+                else if (indicator === INDICATORS[2]) {
+                  const { signal } = getScRsi(symbol, time);
+                  console.log(signal);
                 }
               } // Manual Bot Block
               else {
