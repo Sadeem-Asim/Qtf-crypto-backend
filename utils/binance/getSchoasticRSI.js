@@ -1,6 +1,6 @@
 import Binance from "node-binance-api";
 import TechnicalIndicators from "technicalindicators";
-
+import _ from "lodash";
 // Replace these with your Binance API key and secret
 const apiKey = "YOUR_API_KEY";
 const apiSecret = "YOUR_API_SECRET";
@@ -40,8 +40,8 @@ const getScRsi = async (symbol = "BTCUSDT", interval = "1m") => {
     let signal = "NO";
     let ticks = await binance.candlesticks(symbol, interval);
     const currentPrice = parseFloat(ticks[ticks.length - 1][4]);
-    console.log(ticks[ticks.length - 1]);
-    console.log("Current Price: " + currentPrice);
+    // console.log(ticks[ticks.length - 1]);
+    // console.log("Current Price: " + currentPrice);
     const closes = ticks.map((candle) => parseFloat(candle[4]));
 
     const res1 = calculateEMA(closes);
@@ -50,19 +50,21 @@ const getScRsi = async (symbol = "BTCUSDT", interval = "1m") => {
     let rsi = res2[res2.length - 1];
     rsi.k = _.round(rsi.k, 2);
     rsi.d = _.round(rsi.d, 2);
-    console.log(rsi);
+    // console.log(rsi);
 
-    console.log("EMA : ", ema);
+    // console.log("EMA : ", ema);
     if (currentPrice > ema) {
       if (rsi.k >= rsi.d) {
         signal = "BUY";
+      } else {
+        signal = "SELL";
       }
-    }
-    if (rsi.k < rsi.d) {
+    } else {
       signal = "SELL";
     }
-    console.log(signal);
-    return { signal };
+
+    // console.log(signal);
+    return signal;
   } catch (error) {
     console.error("Error:", error.body ? error.body : error);
   }
