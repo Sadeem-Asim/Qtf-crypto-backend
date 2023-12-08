@@ -56,10 +56,9 @@ const getScRsi = async (symbol = "BTCUSDT", interval = "1m") => {
     if (currentPrice > ema) {
       if (rsi.k >= rsi.d) {
         signal = "BUY";
-      } else {
-        signal = "SELL";
       }
-    } else {
+    }
+    if (rsi.k < rsi.d) {
       signal = "SELL";
     }
 
