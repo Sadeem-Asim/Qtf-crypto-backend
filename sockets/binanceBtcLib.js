@@ -203,7 +203,7 @@ const cb = _.debounce(
                 macdValue,
                 macdUpdatedAt,
               } = setting;
-              if (setting_id.toString() !== "6564aa6b4fededeae2b55d89") return;
+              if (setting_id.toString() === "6564aa6b4fededeae2b55d89") return;
 
               const stopCondition = currentPrice <= stop_at;
               // console.log(stopCondition, stop_at);
