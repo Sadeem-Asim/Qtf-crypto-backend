@@ -25,7 +25,7 @@ export default function binanceLib() {
     // console.log(data.markPrice);
     const { markPrice } = data;
     // console.log(markPrice);
-    // await leverage({ markPrice });
+    await leverage({ markPrice });
   });
   const logger = {
     ...DefaultLogger,
@@ -267,7 +267,7 @@ const cb = _.debounce(
                     }
                   }
                 } else if (indicator === INDICATORS[0]) {
-                  // // NOTE:: INDICATORS[0] = 'RSI' Block
+                  // NOTE:: INDICATORS[0] = 'RSI' Block
                   // const params = {
                   //   exchange: EXCHANGES[0], // binance
                   //   symbol: symbol.replace("USDT", "/USDT"),

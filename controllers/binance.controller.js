@@ -698,7 +698,7 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
         });
 
         if (leverage) {
-          if (pnl) leverage.sell = response.avgPrice;
+          leverage.sell = response.avgPrice;
           leverage.profit += profit;
           leverage.active = false;
           leverage.save();
@@ -716,7 +716,7 @@ const marketClose = asyncHandlerMiddleware(async (req, res) => {
           active: true,
         });
         if (leverage) {
-          if (pnl) leverage.buy = response.avgPrice;
+          leverage.buy = response.avgPrice;
           leverage.profit += profit;
           leverage.active = false;
           leverage.save();
