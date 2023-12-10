@@ -275,7 +275,7 @@ const cb = _.debounce(
                   );
 
                   if (hasPurchasedCoins) {
-                    if (k >= 80 && k <= d) {
+                    if (k >= 80) {
                       signal = "SELL";
                     }
                     const sellConditionRSI = signal === "SELL"; //NOTE:: RSI overbought condition
@@ -513,19 +513,20 @@ const cb = _.debounce(
                 //   }
                 // }
                 else if (indicator === INDICATORS[2]) {
-                  const { signal } = await getScRsi(symbol, time);
+                  let signal = "NO";
+                  const { k, d } = await getScRsi(symbol, time);
                   console.log(signal);
                   console.log(
                     {
                       i: investment,
                       t: time,
                       hasPurchasedCoins: hasPurchasedCoins,
-                      signal: signal,
+                      // signal: signal,
                     },
                     "ScRsi"
                   );
                   if (hasPurchasedCoins) {
-                    let sellCondition = signal === "SELL";
+                    let sellCondition = k >= 85;
                     console.log(sellCondition);
                     if (sellCondition) {
                       const sellOrderParams = {
@@ -539,8 +540,7 @@ const cb = _.debounce(
                       await sellOrder(sellOrderParams, { raw, investment });
                     }
                   } else {
-                    const buyCondition =
-                      signal === "BUY" && setting.macd === true;
+                    const buyCondition = k < 10 && k > d;
                     console.log(buyCondition);
                     // return;
                     if (buyCondition) {

@@ -37,26 +37,15 @@ function calculateStochRSI(closes, period = 14) {
 
 const getScRsi = async (symbol = "BTCUSDT", interval = "1m") => {
   try {
-    let res = { signal: "NO", k: 0, d: 0 };
+    let res = { k: 0, d: 0 };
     let ticks = await binance.candlesticks(symbol, interval);
     const currentPrice = parseFloat(ticks[ticks.length - 1][4]);
     const closes = ticks.map((candle) => parseFloat(candle[4]));
-    const res1 = calculateEMA(closes);
     const res2 = calculateStochRSI(closes);
     const ema = res1[res1.length - 1];
     let rsi = res2[res2.length - 1];
     res.k = _.round(rsi.k, 2);
     res.d = _.round(rsi.d, 2);
-    // console.log("EMA : ", ema);
-    if (currentPrice > ema) {
-      if (rsi.k >= rsi.d) {
-        res.signal = "BUY";
-      }
-    }
-    if (rsi.k < rsi.d) {
-      res.signal = "SELL";
-    }
-    // console.log(signal);
     return res;
   } catch (error) {
     console.error("Error:", error.body ? error.body : error);

@@ -179,77 +179,70 @@ const cb = _.debounce(
                   }
                 }
               } else if (indicator === INDICATORS[0]) {
-                // // NOTE:: INDICATORS[0] = 'RSI' Block
-                // const params = {
-                //   exchange: EXCHANGES[0], // binance
-                //   symbol: symbol.replace("USDT", "/USDT"),
-                //   interval: time,
-                // };
-                // const rsi = await fetchRSIValues(params);
-                // console.log(
-                //   {
-                //     u: up,
-                //     l: low,
-                //     rsi: _.floor(rsi?.value),
-                //     c: currentPrice,
-                //     s: stop_at,
-                //     r: bots?.length,
-                //   },
-                //   "R"
-                // );
-                // // console.log("RSI ->", _.round(rsi?.value), "BTCUSDT ->", currentPrice);
-                // const sellConditionRSI = _.floor(rsi.value) >= up; //NOTE:: RSI overbought condition
-                // if (hasPurchasedCoins) {
-                //   if (sellConditionRSI) {
-                //     const sellOrderParams = {
-                //       symbol,
-                //       bot_id: _id,
-                //       setting_id,
-                //       user_id: user,
-                //       quantity: raw?.qty,
-                //       currentPrice,
-                //     };
-                //     await sellOrder(sellOrderParams, { raw, investment });
-                //   } else if (stopCondition) {
-                //     // await stopBot({ setting_id, currentPrice });
-                //   }
-                // }
-                // //NOTE:: Buy & Stop loss Logic Block (RSI)
-                // else {
-                //   // const stopCondition = currentPrice <= stop_at;
-                //   const min = low - 5;
-                //   console.log(min, low);
-                //   const buyCondition = inRange(_.round(rsi?.value), min, low); //NOTE:: RSI oversold condition
-                //   if (buyCondition) {
-                //     const buyOrderParams = {
-                //       symbol,
-                //       investment,
-                //       setting_id,
-                //       bot_id: _id,
-                //       user_id: user,
-                //       currentPrice,
-                //     };
-                //     await buyOrder(buyOrderParams);
-                //   }
-                //   //NOTE::Stop loss Logic Block
-                //   else if (stopCondition) {
-                //     // await stopBot({ setting_id, currentPrice });
-                //   }
-                // }
+                let signal = "NO";
+                const { k, d } = await getScRsi(symbol, time);
+                console.log(
+                  {
+                    u: 80,
+                    l: 20,
+                    rsi: k,
+                    c: currentPrice,
+                    r: bots?.length,
+                  },
+                  "R"
+                );
+
+                if (hasPurchasedCoins) {
+                  if (k >= 80) {
+                    signal = "SELL";
+                  }
+                  const sellConditionRSI = signal === "SELL"; //NOTE:: RSI overbought condition
+                  if (sellConditionRSI) {
+                    const sellOrderParams = {
+                      symbol,
+                      bot_id: _id,
+                      setting_id,
+                      user_id: user,
+                      quantity: raw?.qty,
+                      currentPrice,
+                    };
+                    await sellOrder(sellOrderParams, { raw, investment });
+                  }
+                }
+                //NOTE:: Buy & Stop loss Logic Block (RSI)
+                else {
+                  if (k < 20 && k > d) {
+                    signal = "BUY";
+                  }
+                  const buyCondition = signal === "BUY"; //NOTE:: RSI oversold condition
+                  if (buyCondition) {
+                    const buyOrderParams = {
+                      symbol,
+                      investment,
+                      setting_id,
+                      bot_id: _id,
+                      user_id: user,
+                      currentPrice,
+                    };
+                    await buyOrder(buyOrderParams);
+                  }
+                }
+                console.log(signal);
               } else if (indicator === INDICATORS[2]) {
-                const signal = await getScRsi(symbol, time);
+                let signal = "NO";
+                const { k, d } = await getScRsi(symbol, time);
                 console.log(signal);
                 console.log(
                   {
                     i: investment,
                     t: time,
                     hasPurchasedCoins: hasPurchasedCoins,
-                    signal: signal,
+                    // signal: signal,
                   },
                   "ScRsi"
                 );
                 if (hasPurchasedCoins) {
-                  let sellCondition = signal === "SELL";
+                  let sellCondition = k >= 85;
                   console.log(sellCondition);
                   if (sellCondition) {
                     const sellOrderParams = {
@@ -263,8 +256,7 @@ const cb = _.debounce(
                     await sellOrder(sellOrderParams, { raw, investment });
                   }
                 } else {
-                  const buyCondition =
-                    signal === "BUY" && setting.macd === true;
+                  const buyCondition = k < 10 && k > d;
                   console.log(buyCondition);
                   // return;
                   if (buyCondition) {
