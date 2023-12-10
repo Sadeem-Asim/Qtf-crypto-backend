@@ -42,7 +42,7 @@ const getScRsi = async (symbol = "BTCUSDT", interval = "1m") => {
     const currentPrice = parseFloat(ticks[ticks.length - 1][4]);
     const closes = ticks.map((candle) => parseFloat(candle[4]));
     const res2 = calculateStochRSI(closes);
-    const ema = res1[res1.length - 1];
+    // const ema = res1[res1.length - 1];
     let rsi = res2[res2.length - 1];
     res.k = _.round(rsi.k, 2);
     res.d = _.round(rsi.d, 2);
