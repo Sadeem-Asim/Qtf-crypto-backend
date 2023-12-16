@@ -51,6 +51,7 @@ const createBot = asyncHandlerMiddleware(async (req, res) => {
   const rsiInvestment = 0; // TODO:: Should be in percentage
   const trailingInvestment = 0; // TODO:: Should be in percentage
   const macdInvestment = 0;
+  const qtfInvestment = 0;
   req["body"]["availableBalance"] = investment - manualInvestment; // for manual order
 
   // NOTE:: 1 Manual Bot Settings Param
@@ -87,10 +88,19 @@ const createBot = asyncHandlerMiddleware(async (req, res) => {
   };
   const settingParams4 = {
     user,
-    indicator: INDICATORS[2],
+    indicator: INDICATORS[3],
     operation: OPERATION[1],
     risk,
     investment: macdInvestment,
+    isActive: false,
+  }; // MACD
+
+  const settingParams5 = {
+    user,
+    indicator: INDICATORS[2],
+    operation: OPERATION[1],
+    risk,
+    investment: qtfInvestment,
     isActive: false,
   }; // MACD
 
@@ -104,6 +114,7 @@ const createBot = asyncHandlerMiddleware(async (req, res) => {
     asyncSaveBotSetting(settingParams2),
     asyncSaveBotSetting(settingParams3),
     asyncSaveBotSetting(settingParams4),
+    asyncSaveBotSetting(settingParams5),
   ]);
 
   req.body.setting = settings;
@@ -311,31 +322,39 @@ const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
     );
   }
   console.log(botSetting);
+  if (!botSetting["qtf2"]) {
+    botSetting["qtf2"] = botSetting["macd"];
+  }
 
   const rsi = botSetting["rsi"];
   const manual = botSetting["manual"];
   const trailing = botSetting["trailing"];
   const macd = botSetting["macd"];
+  const qtf2 = botSetting["qtf2"];
 
   // botSetting;
   const rsiBotId = rsi["_id"];
   const manualBotId = manual["_id"];
   const trailingBotId = trailing["_id"];
   const macdBotId = macd["_id"];
+  const qtf2BotId = qtf2["_id"];
 
   const rsiProfit = rsi?.["profit"] || 0;
   const manualProfit = manual?.["profit"] || 0;
   const trailingProfit = trailing?.["profit"] || 0;
   const macdProfit = macd?.["profit"] || 0;
+  const qtf2Profit = qtf2?.["profit"] || 0;
 
   const isActive =
     rsi["isActive"] ||
     manual["isActive"] ||
     trailing["isActive"] ||
+    qtf2["isActive"] ||
     macd["isActive"];
 
   const availableBalance = (() => {
-    let total = rsiProfit + manualProfit + trailingProfit + macdProfit;
+    let total =
+      rsiProfit + manualProfit + trailingProfit + macdProfit + qtf2Profit;
     if (rsi["isActive"]) {
       total += Number(rsi["investment"]);
     } else {
@@ -357,6 +376,11 @@ const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
     } else {
       macd["investment"] = 0;
     }
+    if (qtf2["isActive"]) {
+      total += Number(qtf2["investment"]);
+    } else {
+      macd["investment"] = 0;
+    }
 
     return Number(bot.investment) - total;
   })();
@@ -367,6 +391,7 @@ const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
     updateManualBotSetting(manualBotId, botSetting["manual"]),
     updateTrailingBotSetting(trailingBotId, botSetting["trailing"]),
     updateMacdBotSetting(macdBotId, botSetting["macd"]),
+    updateMacdBotSetting(qtf2BotId, botSetting["qtf2"]),
   ]);
 
   res.send("Setting Successfully updated");

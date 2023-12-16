@@ -7,7 +7,7 @@ export const BOT_STATUS = { COINS_PURCHASED: true, COIN_SOLD: false };
 // export const BOT_STATUS = {IN_PROCESS: false, COMPLETED: true}
 
 /*****  BOT  *****/
-export const INDICATORS = ["RSI", "TRAILING", "MACD"];
+export const INDICATORS = ["RSI", "TRAILING", "MACD", "QTF2"];
 export const RISKS = ["LOW", "MODERATE", "HIGH"];
 export const STAGES = { LOW: "Q1", MODERATE: "Q2", HIGH: "Q3", DEFAULT: "?" };
 export const EXCHANGES = ["BINANCE"];

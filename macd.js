@@ -18,8 +18,8 @@ const calculateMACD = (candles) => {
   const closes = candles.map((candle) => parseFloat(candle[4]));
   const macdInput = {
     values: closes,
-    fastPeriod: 24,
-    slowPeriod: 52,
+    fastPeriod: 12,
+    slowPeriod: 26,
     signalPeriod: 9,
     SimpleMAOscillator: false,
     SimpleMASignal: false,
@@ -44,8 +44,7 @@ const checkSignal = (macdValues) => {
 
 const runBot = async (symbol = "BTCUSDT", interval = "1m") => {
   try {
-    const ticks = await binance.candlesticks(symbol, interval);
-    console.log(ticks);
+    let ticks = await binance.candlesticks(symbol, interval);
     const macdValues = calculateMACD(ticks);
     const res = checkSignal(macdValues);
     return res;
@@ -57,7 +56,7 @@ const runBot = async (symbol = "BTCUSDT", interval = "1m") => {
 // Run the bot
 (async () => {
   setInterval(async () => {
-    const result = await runBot("BTCUSDT", "30m");
+    const result = await runBot("BTCUSDT", "15m");
     console.log(result);
   }, 1000);
 })();

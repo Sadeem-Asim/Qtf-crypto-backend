@@ -18,8 +18,8 @@ const calculateMACD = (candles) => {
   const closes = candles.map((candle) => parseFloat(candle[4]));
   const macdInput = {
     values: closes,
-    fastPeriod: 24,
-    slowPeriod: 52,
+    fastPeriod: 12,
+    slowPeriod: 26,
     signalPeriod: 9,
     SimpleMAOscillator: false,
     SimpleMASignal: false,
@@ -30,14 +30,17 @@ const calculateMACD = (candles) => {
 };
 
 const checkSignal = (macdValues) => {
-  const lastMACD = macdValues[macdValues.length - 1];
-  // console.log(lastMACD);
-  if (lastMACD.MACD > lastMACD.signal) {
+  let lastMACD = macdValues[macdValues.length - 1];
+  console.log(lastMACD);
+  if (lastMACD.MACD > lastMACD.signal && lastMACD.MACD < 0) {
     return { signal: "BUY", macd: lastMACD.histogram };
-  } else if (lastMACD.MACD < lastMACD.signal) {
+  } else if (
+    (lastMACD.MACD < lastMACD.signal && lastMACD.MACD > 70) ||
+    lastMACD.MACD >= 90
+  ) {
     return { signal: "SELL", macd: lastMACD.histogram };
   } else {
-    return { signal: "", macd: "" };
+    return { signal: "NO", macd: "" };
   }
 };
 
