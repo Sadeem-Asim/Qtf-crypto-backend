@@ -32,15 +32,28 @@ const calculateMACD = (candles) => {
 const checkSignal = (macdValues) => {
   let lastMACD = macdValues[macdValues.length - 1];
   console.log(lastMACD);
-  if (lastMACD.MACD > lastMACD.signal && lastMACD.MACD < 0) {
-    return { signal: "BUY", macd: lastMACD.histogram };
-  } else if (
-    (lastMACD.MACD < lastMACD.signal && lastMACD.MACD > 70) ||
-    lastMACD.MACD >= 90
-  ) {
-    return { signal: "SELL", macd: lastMACD.histogram };
+  if (symbol === "BTCUSDT") {
+    if (lastMACD.MACD > lastMACD.signal && lastMACD.MACD < 0) {
+      return { signal: "BUY", macd: lastMACD.histogram };
+    } else if (
+      (lastMACD.MACD < lastMACD.signal && lastMACD.MACD > 70) ||
+      lastMACD.MACD >= 90
+    ) {
+      return { signal: "SELL", macd: lastMACD.histogram };
+    } else {
+      return { signal: "NO", macd: "" };
+    }
   } else {
-    return { signal: "NO", macd: "" };
+    if (lastMACD.MACD > lastMACD.signal && lastMACD.MACD < 0) {
+      return { signal: "BUY", macd: lastMACD.histogram };
+    } else if (
+      (lastMACD.MACD < lastMACD.signal && lastMACD.MACD > 20) ||
+      lastMACD.MACD >= 40
+    ) {
+      return { signal: "SELL", macd: lastMACD.histogram };
+    } else {
+      return { signal: "NO", macd: "" };
+    }
   }
 };
 
