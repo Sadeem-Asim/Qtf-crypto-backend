@@ -278,6 +278,53 @@ const cb = _.debounce(
                     );
                   }
                 }
+              } else if (indicator === INDICATORS[3]) {
+                // MACD BLOCK
+                const { signal, macd } = await getMACD(symbol, time);
+                if (!signal) return;
+                console.log(
+                  {
+                    i: investment,
+                    t: time,
+                    hasPurchasedCoins: hasPurchasedCoins,
+                    signal: signal,
+                    macd: macd,
+                  },
+                  "MACD"
+                );
+                // return;
+
+                if (hasPurchasedCoins) {
+                  let sellCondition = signal === "SELL";
+                  console.log(sellCondition);
+                  // return;
+                  if (sellCondition) {
+                    const sellOrderParams = {
+                      symbol,
+                      bot_id: _id,
+                      setting_id,
+                      user_id: user,
+                      quantity: raw?.qty,
+                      currentPrice,
+                    };
+                    await sellOrder(sellOrderParams, { raw, investment });
+                  }
+                } else {
+                  const buyCondition = signal === "BUY";
+                  console.log(buyCondition);
+                  // return;
+                  if (buyCondition) {
+                    const buyOrderParams = {
+                      symbol,
+                      investment,
+                      setting_id,
+                      bot_id: _id,
+                      user_id: user,
+                      currentPrice,
+                    };
+                    await buyOrder(buyOrderParams);
+                  }
+                }
               }
             } // Manual Bot Block
             else {
