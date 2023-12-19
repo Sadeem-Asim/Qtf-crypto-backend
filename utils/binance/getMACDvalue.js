@@ -47,8 +47,8 @@ const checkSignal = (macdValues, symbol) => {
     if (lastMACD.MACD > lastMACD.signal && lastMACD.MACD < 0) {
       return { signal: "BUY", macd: lastMACD.histogram };
     } else if (
-      (lastMACD.MACD < lastMACD.signal && lastMACD.MACD > 20) ||
-      lastMACD.MACD >= 40
+      (lastMACD.MACD < lastMACD.signal && lastMACD.MACD > 5) ||
+      lastMACD.MACD >= 10
     ) {
       return { signal: "SELL", macd: lastMACD.histogram };
     } else {
