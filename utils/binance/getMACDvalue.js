@@ -29,7 +29,7 @@ const calculateMACD = (candles) => {
   return result;
 };
 
-const checkSignal = (macdValues) => {
+const checkSignal = (macdValues, symbol) => {
   let lastMACD = macdValues[macdValues.length - 1];
   console.log(lastMACD);
   if (symbol === "BTCUSDT") {
@@ -61,7 +61,7 @@ const getMACD = async (symbol = "BTCUSDT", interval = "1m") => {
   try {
     const ticks = await binance.candlesticks(symbol, interval);
     const macdValues = calculateMACD(ticks);
-    const res = checkSignal(macdValues);
+    const res = checkSignal(macdValues, symbol);
     return res;
   } catch (error) {
     console.error("Error:", error.body ? error.body : error);
