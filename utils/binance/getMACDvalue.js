@@ -33,7 +33,7 @@ const checkSignal = (macdValues, symbol) => {
   let lastMACD = macdValues[macdValues.length - 1];
   console.log(lastMACD);
   if (symbol === "BTCUSDT") {
-    if (lastMACD.MACD > lastMACD.signal && lastMACD.MACD < 0) {
+    if (lastMACD.MACD > lastMACD.signal && lastMACD.MACD < -20) {
       return { signal: "BUY", macd: lastMACD.histogram };
     } else if (
       (lastMACD.MACD < lastMACD.signal && lastMACD.MACD > 70) ||
