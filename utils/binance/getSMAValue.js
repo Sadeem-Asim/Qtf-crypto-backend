@@ -101,8 +101,8 @@ const getSMA = async (
 
 // Run the bot
 export default getSMA;
-// setInterval(() => {
-//   (async () => {
-//     console.log(await getSMA("BTCUSDT", "5m"));
-//   })();
-// }, 1500);
+setInterval(() => {
+  (async () => {
+    console.log(await getSMA("BTCUSDT", "5m"));
+  })();
+}, 1500);

@@ -316,7 +316,7 @@ const cb = _.debounce(
                   // return;
                   if (hasPurchasedCoins) {
                     let sellCondition =
-                      signal === "SELL" || currentPrice <= smmaHigh;
+                      signal === "SELL" || currentPrice <= takeProfit;
                     console.log("Sell Condition : ", sellCondition);
                     if (sellCondition) {
                       const sellOrderParams = {
