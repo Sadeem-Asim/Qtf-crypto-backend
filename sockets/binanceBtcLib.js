@@ -8,6 +8,7 @@ import leverageMarketClose from "#utils/binance/leverageMarketClose";
 import leverageMarketOpen from "#utils/binance/leverageMarketOpen";
 import getMACD from "#utils/binance/getMACDvalue";
 import getScRsi from "#utils/binance/getSchoasticRSI";
+import getSMA from "#utils/binance/getSMAValue";
 import _ from "lodash";
 import inRange from "#utils/common/inRange";
 import { BotSetting } from "#models/bot_setting.model";
@@ -132,20 +133,6 @@ const leverage = _.debounce(
   { maxWait: 2000, trailing: true }
 );
 
-// const TIME = {
-//   "1m": 1,
-//   "3m": 3,
-//   "5m": 5,
-//   "15m": 15,
-//   "30m": 16,
-//   "1h": 16,
-//   "2h": 16,
-//   "4h": 16,
-//   "6h": 16,
-//   "8 hours": 16,
-//   "12 hours": 16,
-// };
-
 const cb = _.debounce(
   async ({ currentPrice, coin, symbol }) => {
     try {
@@ -197,7 +184,7 @@ const cb = _.debounce(
                 // macdValue,
                 // macdUpdatedAt,
               } = setting;
-              // if (setting_id.toString() !== "657c98309a2e19a3b51bcd75") return;
+              // if (setting_id.toString() !== "657c98309a2e19a3b51bcd76") return;
 
               const stopCondition = currentPrice <= stop_at;
               // console.log(stopCondition, stop_at);
@@ -311,21 +298,26 @@ const cb = _.debounce(
                   }
                   console.log(signal);
                 } else if (indicator === INDICATORS[2]) {
-                  let signal = "NO";
-                  const { k, d } = await getScRsi(symbol, time);
-                  console.log(signal);
+                  const { signal, smmaHigh } = await getSMA(
+                    symbol,
+                    time,
+                    hasPurchasedCoins
+                  );
+                  console.log(signal, smmaHigh);
                   console.log(
                     {
                       i: investment,
                       t: time,
                       hasPurchasedCoins: hasPurchasedCoins,
-                      // signal: signal,
+                      signal: signal,
                     },
-                    "ScRsi"
+                    "SMA"
                   );
+                  // return;
                   if (hasPurchasedCoins) {
-                    let sellCondition = k >= 85;
-                    console.log(sellCondition);
+                    let sellCondition =
+                      signal === "SELL" || currentPrice <= smmaHigh;
+                    console.log("Sell Condition : ", sellCondition);
                     if (sellCondition) {
                       const sellOrderParams = {
                         symbol,
@@ -335,12 +327,20 @@ const cb = _.debounce(
                         quantity: raw?.qty,
                         currentPrice,
                       };
+                      // return;
                       await sellOrder(sellOrderParams, { raw, investment });
+                    } else if (currentPrice > smmaHigh) {
+                      await BotSetting.findByIdAndUpdate(
+                        setting_id,
+                        {
+                          takeProfit: smmaHigh,
+                        },
+                        { new: true }
+                      );
                     }
                   } else {
-                    const buyCondition = k < 10 && k > d;
-                    console.log(buyCondition);
-                    // return;
+                    const buyCondition = signal === "BUY";
+                    console.log("Buy Condition : ", buyCondition);
                     if (buyCondition) {
                       const buyOrderParams = {
                         symbol,
@@ -350,6 +350,7 @@ const cb = _.debounce(
                         user_id: user,
                         currentPrice,
                       };
+                      // return;
                       await buyOrder(buyOrderParams);
                       await BotSetting.findByIdAndUpdate(
                         setting_id,

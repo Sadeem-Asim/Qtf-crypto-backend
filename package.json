@@ -15,6 +15,7 @@
     "data:destroy": "node seeder -d"
   },
   "dependencies": {
+    "@debut/indicators": "^1.3.19",
     "axios": "^1.1.3",
     "bcrypt": "^5.1.0",
     "binance": "^2.8.8",
