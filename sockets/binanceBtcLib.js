@@ -329,7 +329,7 @@ const cb = _.debounce(
                       };
                       // return;
                       await sellOrder(sellOrderParams, { raw, investment });
-                    } else if (currentPrice + 50 > smmaHigh) {
+                    } else if (currentPrice > smmaHigh + 50) {
                       await BotSetting.findByIdAndUpdate(
                         setting_id,
                         {
