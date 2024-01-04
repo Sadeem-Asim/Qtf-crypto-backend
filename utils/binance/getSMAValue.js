@@ -39,23 +39,23 @@ const checkSignal = (
   currentPrice,
   hasPurchasedCoins
 ) => {
-  if (currentPrice > smmaHigh && hasPurchasedCoins === false) {
-    if (maShort + 10 > maLong) {
-      return { signal: "BUY", smmaHigh };
-    } else if (maLong + 10 < maShort) {
-      return { signal: "SELL" };
-    } else {
-      return { signal: "NO" };
-    }
+  // if (currentPrice > smmaHigh && hasPurchasedCoins === false) {
+  //   if (maShort + 10 > maLong) {
+  //     return { signal: "BUY", smmaHigh };
+  //   } else if (maLong + 10 < maShort) {
+  //     return { signal: "SELL" };
+  //   } else {
+  //     return { signal: "NO" };
+  //   }
+  // } else {
+  if (currentPrice < smmaLow && maShort > maLong) {
+    return { signal: "BUY", smmaHigh };
+  } else if (currentPrice > smmaHigh && maLong < maShort) {
+    return { signal: "SELL" };
   } else {
-    if (currentPrice < smmaLow && maShort > maLong) {
-      return { signal: "BUY", smmaHigh };
-    } else if (currentPrice > smmaHigh && maLong < maShort) {
-      return { signal: "SELL" };
-    } else {
-      return { signal: "NO" };
-    }
+    return { signal: "NO" };
   }
+  // }
 };
 
 function calculateMA(values, period) {
@@ -101,8 +101,8 @@ const getSMA = async (
 
 // Run the bot
 export default getSMA;
-setInterval(() => {
-  (async () => {
-    console.log(await getSMA("BTCUSDT", "5m"));
-  })();
-}, 1500);
+// setInterval(() => {
+//   (async () => {
+//     console.log(await getSMA("BTCUSDT", "5m"));
+//   })();
+// }, 1500);
