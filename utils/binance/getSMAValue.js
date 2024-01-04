@@ -51,9 +51,9 @@ const checkSignal = (
   if (currentPrice < smmaLow && maShort > maLong) {
     return { signal: "BUY", smmaHigh };
   } else if (currentPrice > smmaHigh && maShort < maLong) {
-    return { signal: "SELL" };
+    return { signal: "SELL", smmaHigh };
   } else {
-    return { signal: "NO" };
+    return { signal: "NO", smmaHigh };
   }
   // }
 };
