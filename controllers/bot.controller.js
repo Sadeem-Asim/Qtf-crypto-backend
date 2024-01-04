@@ -331,7 +331,6 @@ const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
   const trailing = botSetting["trailing"];
   const macd = botSetting["macd"];
   const qtf2 = botSetting["qtf2"];
-
   // botSetting;
   const rsiBotId = rsi["_id"];
   const manualBotId = manual["_id"];
@@ -379,7 +378,7 @@ const updateBotAndSetting = asyncHandlerMiddleware(async (req, res) => {
     if (qtf2["isActive"]) {
       total += Number(qtf2["investment"]);
     } else {
-      macd["investment"] = 0;
+      qtf2["investment"] = 0;
     }
 
     return Number(bot.investment) - total;
@@ -483,7 +482,7 @@ const updateManualBotSetting = async (id, data) =>
     ]),
     { new: true }
   );
-const updateMacdBotSetting = async (id, data) =>
+const updateMacdBotSetting = async (id, data) => {
   await BotSetting.findByIdAndUpdate(
     id,
     _.pick(data, [
@@ -499,6 +498,8 @@ const updateMacdBotSetting = async (id, data) =>
     ]),
     { new: true }
   );
+  // console.log(res);
+};
 
 const updateTrailingBotSetting = async (id, data) =>
   await BotSetting.findByIdAndUpdate(
