@@ -68,6 +68,7 @@ const botSettingSchema = new mongoose.Schema(
     stats: {
       buy: [Number],
       sell: [Number],
+      profit: [Number],
     },
     macd: {
       type: Boolean,
