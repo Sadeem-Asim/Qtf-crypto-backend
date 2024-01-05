@@ -327,6 +327,13 @@ const cb = _.debounce(
                         quantity: raw?.qty,
                         currentPrice,
                       };
+                      await BotSetting.findByIdAndUpdate(
+                        setting_id,
+                        {
+                          takeProfit: 0,
+                        },
+                        { new: true }
+                      );
                       // return;
                       await sellOrder(sellOrderParams, { raw, investment });
                     } else if (currentPrice > smmaHigh + 50) {

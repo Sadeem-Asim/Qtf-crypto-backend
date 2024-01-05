@@ -82,7 +82,7 @@ const sellOrder = async (
           $unset: { raw: 1 },
           $set: { isActive: false, investment: 0, hasPurchasedCoins: false },
           $push: { "stats.sell": Number(price) },
-          $push: { "stats.profit": Number(profit) },
+          // $push: { "stats.profit": Number(profit) },
         });
         //NOTE:: Updating Bot in Manual Configuration
         await Bot.findByIdAndUpdate(bot_id, {
@@ -95,7 +95,7 @@ const sellOrder = async (
           $inc: { profit: profit },
           $unset: { raw: 1 },
           $push: { "stats.sell": Number(price) },
-          $push: { "stats.profit": Number(profit) },
+          // $push: { "stats.profit": Number(profit) },
         });
         //NOTE:: Updating Bot in RSI and Trailing Configuration
         await Bot.findByIdAndUpdate(bot_id, {
